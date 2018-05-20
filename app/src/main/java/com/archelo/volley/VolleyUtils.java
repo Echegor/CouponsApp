@@ -1,5 +1,9 @@
 package com.archelo.volley;
 
+import android.util.Log;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
 import com.archelo.shoprite.coupons.json.AzureToken;
 import com.archelo.shoprite.coupons.json.LoginStatus;
 import com.google.gson.Gson;
@@ -90,5 +94,51 @@ public class VolleyUtils {
 
         }
         return "?" + builder.toString();
+    }
+
+    public static void logToCurlRequest(Request<?> request) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("curl request: curl ");
+        builder.append("-X \"");
+        switch (request.getMethod()) {
+            case Request.Method.POST:
+                builder.append("POST");
+                break;
+            case Request.Method.GET:
+                builder.append("GET");
+                break;
+            case Request.Method.PUT:
+                builder.append("PUT");
+                break;
+            case Request.Method.DELETE:
+                builder.append("DELETE");
+                break;
+        }
+        builder.append("\"");
+
+        try {
+            if (request.getBody() != null) {
+                builder.append(" -D ");
+                String data = new String(request.getBody());
+                data = data.replaceAll("\"", "\\\"");
+                builder.append("\"");
+                builder.append(data);
+                builder.append("\"");
+            }
+            for (String key : request.getHeaders().keySet()) {
+                builder.append(" -H '");
+                builder.append(key);
+                builder.append(": ");
+                builder.append(request.getHeaders().get(key));
+                builder.append("'");
+            }
+            builder.append(" \"");
+            builder.append(request.getUrl());
+            builder.append("\"");
+
+            Log.d("VOLLEY",builder.toString());
+        } catch (AuthFailureError e) {
+            Log.d("VOLLEY","Unable to get body of response or headers for curl logging");
+        }
     }
 }

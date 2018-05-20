@@ -46,6 +46,7 @@ import com.archelo.volley.SamlRequest;
 import com.archelo.volley.SamlResponse;
 import com.archelo.volley.StatusRequest;
 import com.archelo.volley.VerifySignInRequest;
+import com.archelo.volley.VolleyUtils;
 import com.example.rtl1e.shopritecoupons.R;
 import com.google.gson.Gson;
 
@@ -268,7 +269,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 Log.d(TAG,"Error occured " + error);
             }
         });
-
+        VolleyUtils.logToCurlRequest(authenticate3601Request);
         queue.add(authenticate3601Request);
     }
 
