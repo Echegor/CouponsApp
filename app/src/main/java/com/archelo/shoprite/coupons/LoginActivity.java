@@ -18,6 +18,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -28,9 +29,25 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.Volley;
 import com.archelo.shoprite.coupons.http.StateSaver;
+import com.archelo.shoprite.coupons.json.LoginStatus;
+import com.archelo.shoprite.coupons.urls.AzureUrls;
+import com.archelo.shoprite.coupons.urls.ShopriteURLS;
 import com.archelo.shoprite.coupons.utils.HttpUtils;
+import com.archelo.volley.Authenticate3601Request;
+import com.archelo.volley.CookieStore;
+import com.archelo.volley.SamlRequest;
+import com.archelo.volley.SamlResponse;
+import com.archelo.volley.StatusRequest;
+import com.archelo.volley.VerifySignInRequest;
 import com.example.rtl1e.shopritecoupons.R;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,6 +83,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private View mProgressView;
     private View mLoginFormView;
 
+    private RequestQueue queue;
+    private CookieStore cookieStore = new CookieStore();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,6 +116,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        queue = Volley.newRequestQueue(this);
     }
 
     private void populateAutoComplete() {
@@ -189,10 +211,101 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            //performLogin(email,password);
-            mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
+            performLogin(email,password);
+//            mAuthTask = new UserLoginTask(email, password);
+//            mAuthTask.execute((Void) null);
         }
+    }
+
+    private void performLogin(final String email,final String password) {
+        StatusRequest statusRequest = new StatusRequest(cookieStore, Request.Method.GET, ShopriteURLS.STATUS, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG,"StatusRequest response " + response);
+                Log.d(TAG,cookieStore.toString());
+                LoginStatus loginStatus = new Gson().fromJson(response,LoginStatus.class);
+                performSamlRequest(loginStatus,email,password);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG,"Error occured " + error);
+            }
+        });
+
+        queue.add(statusRequest);
+    }
+
+    private void performSamlRequest(final LoginStatus loginStatus, final String email, final String password){
+        SamlRequest samlRequest = new SamlRequest(cookieStore,loginStatus, Request.Method.GET, AzureUrls.SIGN_IN, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG,"SamlRequest response " + response);
+                Log.d(TAG, cookieStore.toString());
+                performAuthenticate3601Request(loginStatus,response,email,password);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG,"Error occured " + error);
+            }
+        });
+
+        queue.add(samlRequest);
+    }
+
+    private void performAuthenticate3601Request(final LoginStatus loginStatus, final String samlRequest,final String email,final String password){
+        Authenticate3601Request authenticate3601Request = new Authenticate3601Request(cookieStore,loginStatus,samlRequest, Request.Method.POST, ShopriteURLS.AUTHENTICATE3601, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG,"Authenticate3601Request response " + response);
+                Log.d(TAG,cookieStore.toString());
+                performSamlResponseRequest(loginStatus,response, email, password);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG,"Error occured " + error);
+            }
+        });
+
+        queue.add(authenticate3601Request);
+    }
+
+    private void performSamlResponseRequest(final LoginStatus loginStatus, final String response, final String email, final String password){
+        SamlResponse samlResponse = new SamlResponse(cookieStore,loginStatus,response,email,password, Request.Method.POST, ShopriteURLS.AUTHENTICATE, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG,"SamlResponse response " + response);
+                Log.d(TAG,cookieStore.toString());
+                peformSignInVerifyRequest(loginStatus,response);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG,"Error occured " + error);
+            }
+        });
+
+        queue.add(samlResponse);
+    }
+
+    private void peformSignInVerifyRequest(final LoginStatus loginStatus, final String response){
+        VerifySignInRequest verifySignInRequest = new VerifySignInRequest(cookieStore,loginStatus,response, Request.Method.POST, AzureUrls.RETURN_FROM_SIGN_IN, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG,"VerifySignInRequest response " + response);
+                Log.d(TAG, cookieStore.toString());
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG,"Error occured " + error);
+            }
+        });
+
+        queue.add(verifySignInRequest);
     }
 
 
