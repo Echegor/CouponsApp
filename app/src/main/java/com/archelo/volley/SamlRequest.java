@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 public class SamlRequest extends StringRequest {
-    public final String TAG = "StatusRequest";
+    public final String TAG = "SamlRequest";
     public final String HEADER_CONTENT_TYPE = "Content-Type";
     private CookieStore cookieStore;
     private LoginStatus loginStatus;
@@ -33,8 +33,8 @@ public class SamlRequest extends StringRequest {
     @Override
     protected Response<String> parseNetworkResponse(NetworkResponse response) {
         List<Header> headers =  response.allHeaders;
-        Log.d(TAG,"Headers: \n" +headers.toString());
-        cookieStore.parseHeaders(headers);
+        Log.d(TAG,"Headers: \n" +headers.toString().replaceAll("],",",\r\n"));
+        cookieStore.parseHeaders(headers,getUrl());
         return super.parseNetworkResponse(response);
     }
 

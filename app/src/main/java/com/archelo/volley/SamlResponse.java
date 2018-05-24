@@ -37,8 +37,8 @@ public class SamlResponse extends StringRequest {
     @Override
     protected Response<String> parseNetworkResponse(NetworkResponse response) {
         List<Header> headers =  response.allHeaders;
-        Log.d(TAG,"Headers: \n" +headers.toString());
-        cookieStore.parseHeaders(headers);
+        Log.d(TAG,"Headers: \n" +headers.toString().replaceAll("],",",\r\n"));
+        cookieStore.parseHeaders(headers,getUrl());
         return super.parseNetworkResponse(response);
     }
 
@@ -61,7 +61,7 @@ public class SamlResponse extends StringRequest {
         headers.put("Host", "secure.shoprite.com");
         headers.put("Origin", "https://secure.shoprite.com");
         headers.put("Referer", "https://secure.shoprite.com/User/SignIn/3601");
-        headers.put("Cookie",cookieStore.getCookies());
+        headers.put("Cookie",cookieStore.getCookies(getUrl()));
         //Log.d(TAG,"getHeaders " + headers);
         return headers;
     }

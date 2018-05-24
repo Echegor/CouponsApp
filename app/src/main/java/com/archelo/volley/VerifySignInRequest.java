@@ -33,8 +33,8 @@ public class VerifySignInRequest extends StringRequest {
     @Override
     protected Response<String> parseNetworkResponse(NetworkResponse response) {
         List<Header> headers =  response.allHeaders;
-        Log.d(TAG,"Headers: \n" +headers.toString());
-        cookieStore.parseHeaders(headers);
+        Log.d(TAG,"Headers: \n" +headers.toString().replaceAll("],",",\r\n"));
+        cookieStore.parseHeaders(headers,getUrl());
         return super.parseNetworkResponse(response);
     }
 
@@ -56,7 +56,7 @@ public class VerifySignInRequest extends StringRequest {
 
         headers.put("Host", "wfsso.azurewebsites.net");
         headers.put("Referer", "https://secure.shoprite.com/Account/DoneEditing/3601");
-        headers.put("Cookie",cookieStore.getCookies());
+        headers.put("Cookie",cookieStore.getCookies(getUrl()));
         //Log.d(TAG,"getHeaders " + headers);
         return headers;
     }

@@ -27,8 +27,8 @@ public class StatusRequest extends StringRequest {
     @Override
     protected Response<String> parseNetworkResponse(NetworkResponse response) {
         List<Header> headers =  response.allHeaders;
-        Log.d(TAG,"Headers: \n" +headers.toString());
-        cookieStore.parseHeaders(headers);
+        Log.d(TAG,"Headers: \n" +headers.toString().replaceAll("],",",\r\n"));
+        cookieStore.parseHeaders(headers,getUrl());
         return super.parseNetworkResponse(response);
     }
 

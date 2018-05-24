@@ -42,6 +42,7 @@ import com.archelo.shoprite.coupons.urls.ShopriteURLS;
 import com.archelo.shoprite.coupons.utils.HttpUtils;
 import com.archelo.volley.Authenticate3601Request;
 import com.archelo.volley.CookieStore;
+import com.archelo.volley.ProxiedHurlStack;
 import com.archelo.volley.SamlRequest;
 import com.archelo.volley.SamlResponse;
 import com.archelo.volley.StatusRequest;
@@ -118,7 +119,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
-        queue = Volley.newRequestQueue(this);
+        queue = Volley.newRequestQueue(this,new ProxiedHurlStack());
     }
 
     private void populateAutoComplete() {
@@ -261,7 +262,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             public void onResponse(String response) {
                 Log.d(TAG,"Authenticate3601Request response " + response);
                 Log.d(TAG,cookieStore.toString());
-                performSamlResponseRequest(loginStatus,response, email, password);
+                showProgress(false);
+                //performSamlResponseRequest(loginStatus,response, email, password);
             }
         }, new Response.ErrorListener() {
             @Override
@@ -269,7 +271,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 Log.d(TAG,"Error occured " + error);
             }
         });
-        VolleyUtils.logToCurlRequest(authenticate3601Request);
         queue.add(authenticate3601Request);
     }
 
