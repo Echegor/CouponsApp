@@ -13,6 +13,7 @@ import org.jsoup.nodes.Document;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Iterator;
 import java.util.Map;
 
 public class VolleyUtils {
@@ -60,6 +61,16 @@ public class VolleyUtils {
                 .signInStatus(loginStatus.isSignedIn())
                 .build();
     }
+
+    public static void logLongString(String TAG,String string){
+        int maxLogSize = 1000;
+        for(int i = 0; i <= string.length() / maxLogSize; i++) {
+            int start = i * maxLogSize;
+            int end = (i+1) * maxLogSize;
+            end = end > string.length() ? string.length() : end;
+            Log.v(TAG, string.substring(start, end));
+        }
+    }
     protected static String toURLEncodedString(Map<String,String> map, boolean encode) {
         if (map == null || map.isEmpty())
             return "";
@@ -94,6 +105,37 @@ public class VolleyUtils {
 
         }
         return "?" + builder.toString();
+    }
+
+    protected static String formatHeaders(Map<String,String> map){
+        if(map == null || map.isEmpty()){
+            return "";
+        }
+
+        StringBuilder builder = new StringBuilder();
+        for(Map.Entry<String,String> item : map.entrySet()){
+            builder.append(item.getKey()).append(": ").append(item.getValue()).append(System.lineSeparator());
+        }
+        return builder.toString();
+    }
+
+    protected static String formatParameters(Map<String,String> map){
+        if(map == null || map.isEmpty()){
+            return "";
+        }
+
+        StringBuilder builder = new StringBuilder();
+        Iterator<Map.Entry<String,String>> iterator = map.entrySet().iterator();
+
+        for(Map.Entry<String,String> entry = iterator.next(); iterator.hasNext(); entry = iterator.next()){
+            builder.append(entry.getKey()).append("=").append(entry.getValue());
+
+            if(iterator.hasNext()){
+                builder.append("&");
+            }
+        }
+
+        return builder.toString();
     }
 
     public static void logToCurlRequest(Request<?> request) {

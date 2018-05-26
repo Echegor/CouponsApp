@@ -29,6 +29,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -51,6 +52,7 @@ import com.archelo.volley.VolleyUtils;
 import com.example.rtl1e.shopritecoupons.R;
 import com.google.gson.Gson;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -119,7 +121,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
-        queue = Volley.newRequestQueue(this,new ProxiedHurlStack());
+        //queue = Volley.newRequestQueue(this,new ProxiedHurlStack());
+        queue = Volley.newRequestQueue(this);
     }
 
     private void populateAutoComplete() {
@@ -234,7 +237,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 Log.d(TAG,"Error occured " + error);
             }
         });
-
+        statusRequest.setShouldCache(false);
         queue.add(statusRequest);
     }
 
@@ -253,11 +256,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
+        samlRequest.setShouldCache(false);
         queue.add(samlRequest);
     }
 
     private void performAuthenticate3601Request(final LoginStatus loginStatus, final String samlRequest,final String email,final String password){
         Authenticate3601Request authenticate3601Request = new Authenticate3601Request(cookieStore,loginStatus,samlRequest, Request.Method.POST, ShopriteURLS.AUTHENTICATE3601, new Response.Listener<String>() {
+//        Authenticate3601Request authenticate3601Request = new Authenticate3601Request(cookieStore,loginStatus,samlRequest, Request.Method.POST, "http://192.168.64.1:8080", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 Log.d(TAG,"Authenticate3601Request response " + response);
@@ -268,9 +273,28 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d(TAG,"Error occured " + error);
+                Log.d(TAG,error.toString());
+                showProgress(false);
+//                String body = null;
+                //get status code here
+//                String statusCode = String.valueOf(error.networkResponse.statusCode);
+//                //get response body and parse with appropriate encoding
+//                if(error.networkResponse.data!=null) {
+//                    try {
+//                        body = new String(error.networkResponse.data,"UTF-8");
+//                    } catch (UnsupportedEncodingException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//                if(body == null)
+//                    return;
+//                Log.d(TAG,"Error status code " + statusCode);
+//                VolleyUtils.logLongString(TAG,body);
+//                showProgress(false);
             }
         });
+        authenticate3601Request.setShouldCache(false);
+        authenticate3601Request.setRetryPolicy(new DefaultRetryPolicy(10000, 0, 1.0f));
         queue.add(authenticate3601Request);
     }
 

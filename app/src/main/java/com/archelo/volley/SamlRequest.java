@@ -35,6 +35,7 @@ public class SamlRequest extends StringRequest {
         List<Header> headers =  response.allHeaders;
         Log.d(TAG,"Headers: \n" +headers.toString().replaceAll("],",",\r\n"));
         cookieStore.parseHeaders(headers,getUrl());
+//        ISO-8859-1
         return super.parseNetworkResponse(response);
     }
 
@@ -51,7 +52,7 @@ public class SamlRequest extends StringRequest {
     public Map<String, String> getHeaders() {
         Map<String,String> headers = new HashMap<>();
         headers.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,application/json, text/javascript,*/*;q=0.8");
-        //headers.put("Accept-Encoding", "gzip, deflate, br"); //death
+//        headers.put("Accept-Encoding", "gzip"); //death
         headers.put("Accept-Language", "en-US,en;q=0.9");
         headers.put("Connection", "keep-alive");
         headers.put("Upgrade-Insecure-Requests", "1");
