@@ -19,13 +19,12 @@ import java.util.Map;
 
 public class Authenticate3601Request extends StringRequest {
     public final String TAG = "Authenticate3601Request";
-    private CookieStore cookieStore;
     private LoginStatus loginStatus;
     private String request;
 
-    public Authenticate3601Request(CookieStore cookieStore, LoginStatus loginStatus, String request, int method, String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
+    public Authenticate3601Request(LoginStatus loginStatus, String request, int method, String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
         super(method, url, listener, errorListener);
-        this.cookieStore = cookieStore;
+        //this.cookieStore = cookieStore;
         this.loginStatus = loginStatus;
         this.request = request;
     }
@@ -38,7 +37,6 @@ public class Authenticate3601Request extends StringRequest {
     protected Response<String> parseNetworkResponse(NetworkResponse response) {
         List<Header> headers = response.allHeaders;
         Log.d(TAG, "Response code " + response.statusCode +" Headers: \n" + headers.toString().replaceAll("],", ",\r\n"));
-        cookieStore.parseHeaders(headers, getUrl());
         return super.parseNetworkResponse(response);
     }
 
@@ -64,9 +62,7 @@ public class Authenticate3601Request extends StringRequest {
         headers.put("Connection", "keep-alive");
         headers.put("Upgrade-Insecure-Requests", "1");
 
-        //headers.put("Content-Type", "application/x-www-form-urlencoded");
         headers.put("Referer", "https://wfsso.azurewebsites.net/SRSSO/SignIn?sessId=" + loginStatus.getUserId() + "&returnUrl=http://coupons.shoprite.com/");
-        headers.put("Cookie", cookieStore.getCookies(getUrl()));
         Log.d(TAG, "Request Headers: \n" + VolleyUtils.formatHeaders(headers));
         return headers;
     }
@@ -90,43 +86,6 @@ public class Authenticate3601Request extends StringRequest {
         return "application/x-www-form-urlencoded";
     }
 
-    @Override
-    public byte[] getBody() throws AuthFailureError {
-
-        Map<String, String> params = getParams();
-        if (params != null && params.size() > 0) {
-            return encodeParameters(params, getParamsEncoding());
-        }
-        return null;
-
-    }
-
-    /**
-     * Converts <code>params</code> into an application/x-www-form-urlencoded encoded string.
-     */
-    private byte[] encodeParameters(Map<String, String> params, String paramsEncoding) {
-        StringBuilder builder = new StringBuilder();
-        boolean isFirst = true;
-        try {
-            for (Map.Entry<String, String> entry : params.entrySet()) {
-
-                if (isFirst) {
-                    builder.append(URLEncoder.encode(entry.getKey(), paramsEncoding))
-                            .append("=")
-                            .append(URLEncoder.encode(entry.getValue(), paramsEncoding));
-                    isFirst = false;
-                } else {
-                    builder.append("&")
-                            .append(URLEncoder.encode(entry.getKey(), paramsEncoding))
-                            .append("=")
-                            .append(URLEncoder.encode(entry.getValue(), paramsEncoding));
-                }
-            }
-            return builder.toString().getBytes(paramsEncoding);
-        } catch (UnsupportedEncodingException uee) {
-            throw new RuntimeException("Encoding not supported: " + paramsEncoding, uee);
-        }
-    }
 
     @Override
     public Priority getPriority() {

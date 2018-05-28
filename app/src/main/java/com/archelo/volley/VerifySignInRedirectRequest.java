@@ -14,14 +14,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class VerifySignInRequest extends StringRequest {
+public class VerifySignInRedirectRequest extends StringRequest {
     public final String TAG = "VerifySignInRequest";
-    private LoginStatus loginStatus;
-    private String request;
-    public VerifySignInRequest(LoginStatus loginStatus, String request, int method, String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
+
+    public VerifySignInRedirectRequest( int method, String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
         super(method, url, listener, errorListener);
-        this.loginStatus = loginStatus;
-        this.request = request;
     }
 
     /*
@@ -51,9 +48,8 @@ public class VerifySignInRequest extends StringRequest {
         headers.put("Connection", "keep-alive");
         headers.put("Upgrade-Insecure-Requests", "1");
 
-        headers.put("Host", "wfsso.azurewebsites.net");
-        headers.put("Referer", "https://secure.shoprite.com/Account/DoneEditing/3601");
-       //headers.put("Cookie",cookieStore.getCookies(getUrl()));
+        headers.put("Host", "coupons.shoprite.com");
+        //headers.put("Cookie",cookieStore.getCookies(getUrl()));
         //Log.d(TAG,"getHeaders " + headers);
         return headers;
     }
@@ -61,19 +57,8 @@ public class VerifySignInRequest extends StringRequest {
     @Override
     protected Map<String, String> getParams() {
         Map<String,String> params = new LinkedHashMap<>();
-        params.put("SAMLResponse", VolleyUtils.getSamlResponseForm(request));
-        params.put("RelayState", VolleyUtils.getRelayState(request));
-
-        Log.d(TAG,"Params " + params);
         return params;
     }
-
-    @Override
-    public String getBodyContentType() {
-        return "application/x-www-form-urlencoded";
-    }
-
-
 
 
     @Override

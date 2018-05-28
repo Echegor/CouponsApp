@@ -18,11 +18,9 @@ import java.util.Map;
 public class SamlRequest extends StringRequest {
     public final String TAG = "SamlRequest";
     public final String HEADER_CONTENT_TYPE = "Content-Type";
-    private CookieStore cookieStore;
     private LoginStatus loginStatus;
-    public SamlRequest(CookieStore cookieStore, LoginStatus loginStatus, int method, String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
+    public SamlRequest(LoginStatus loginStatus, int method, String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
         super(method, url, listener, errorListener);
-        this.cookieStore = cookieStore;
         this.loginStatus = loginStatus;
     }
 
@@ -34,8 +32,6 @@ public class SamlRequest extends StringRequest {
     protected Response<String> parseNetworkResponse(NetworkResponse response) {
         List<Header> headers =  response.allHeaders;
         Log.d(TAG,"Headers: \n" +headers.toString().replaceAll("],",",\r\n"));
-        cookieStore.parseHeaders(headers,getUrl());
-//        ISO-8859-1
         return super.parseNetworkResponse(response);
     }
 
@@ -58,7 +54,7 @@ public class SamlRequest extends StringRequest {
         headers.put("Upgrade-Insecure-Requests", "1");
         headers.put("Host", "wfsso.azurewebsites.net");
         headers.put("Referer", "http://coupons.shoprite.com/");
-        //headers.put("Cookie",cookieStore.getCookies());
+        Log.d(TAG, "Request Headers: \n" + VolleyUtils.formatHeaders(headers));
         return headers;
     }
 

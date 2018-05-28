@@ -14,10 +14,9 @@ import java.util.Map;
 
 public class StatusRequest extends StringRequest {
     public final String TAG = "StatusRequest";
-    private CookieStore cookieStore;
-    public StatusRequest(CookieStore cookieStore,int method, String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
+    public StatusRequest(int method, String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
         super(method, url, listener, errorListener);
-        this.cookieStore = cookieStore;
+        //this.cookieStore = cookieStore;
     }
 
     /*
@@ -28,7 +27,7 @@ public class StatusRequest extends StringRequest {
     protected Response<String> parseNetworkResponse(NetworkResponse response) {
         List<Header> headers =  response.allHeaders;
         Log.d(TAG,"Headers: \n" +headers.toString().replaceAll("],",",\r\n"));
-        cookieStore.parseHeaders(headers,getUrl());
+        //cookieStore.parseHeaders(headers,getUrl());
         return super.parseNetworkResponse(response);
     }
 

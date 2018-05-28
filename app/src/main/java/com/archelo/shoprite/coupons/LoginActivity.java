@@ -34,7 +34,6 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.Volley;
 import com.archelo.shoprite.coupons.http.StateSaver;
 import com.archelo.shoprite.coupons.json.LoginStatus;
@@ -42,17 +41,19 @@ import com.archelo.shoprite.coupons.urls.AzureUrls;
 import com.archelo.shoprite.coupons.urls.ShopriteURLS;
 import com.archelo.shoprite.coupons.utils.HttpUtils;
 import com.archelo.volley.Authenticate3601Request;
-import com.archelo.volley.CookieStore;
-import com.archelo.volley.ProxiedHurlStack;
 import com.archelo.volley.SamlRequest;
 import com.archelo.volley.SamlResponse;
 import com.archelo.volley.StatusRequest;
+import com.archelo.volley.VerifySignInRedirectRequest;
 import com.archelo.volley.VerifySignInRequest;
 import com.archelo.volley.VolleyUtils;
 import com.example.rtl1e.shopritecoupons.R;
 import com.google.gson.Gson;
 
-import java.io.UnsupportedEncodingException;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,11 +89,20 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private View mLoginFormView;
 
     private RequestQueue queue;
-    private CookieStore cookieStore = new CookieStore();
+    private CookieManager cookieManager = new CookieManager();
+
+    private Response.ErrorListener volleyErrorListener = new Response.ErrorListener() {
+        @Override
+        public void onErrorResponse(VolleyError error) {
+            Log.d(TAG,"Error occured " + error);
+            showProgress(false);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_login);
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -122,7 +132,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mProgressView = findViewById(R.id.login_progress);
 
         //queue = Volley.newRequestQueue(this,new ProxiedHurlStack());
+        //Httpurlconnection queries cookiemanager for cookies
+        cookieManager.setCookiePolicy( CookiePolicy.ACCEPT_ALL );
+        CookieHandler.setDefault(cookieManager);
         queue = Volley.newRequestQueue(this);
+
+
+
     }
 
     private void populateAutoComplete() {
@@ -215,6 +231,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
+            cookieManager.getCookieStore().removeAll();
             showProgress(true);
             performLogin(email,password);
 //            mAuthTask = new UserLoginTask(email, password);
@@ -223,115 +240,99 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     private void performLogin(final String email,final String password) {
-        StatusRequest statusRequest = new StatusRequest(cookieStore, Request.Method.GET, ShopriteURLS.STATUS, new Response.Listener<String>() {
+        StatusRequest statusRequest = new StatusRequest(Request.Method.GET, ShopriteURLS.STATUS, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 Log.d(TAG,"StatusRequest response " + response);
-                Log.d(TAG,cookieStore.toString());
+                Log.d(TAG,"CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
                 LoginStatus loginStatus = new Gson().fromJson(response,LoginStatus.class);
                 performSamlRequest(loginStatus,email,password);
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d(TAG,"Error occured " + error);
-            }
-        });
+        },volleyErrorListener );
         statusRequest.setShouldCache(false);
         queue.add(statusRequest);
     }
 
     private void performSamlRequest(final LoginStatus loginStatus, final String email, final String password){
-        SamlRequest samlRequest = new SamlRequest(cookieStore,loginStatus, Request.Method.GET, AzureUrls.SIGN_IN, new Response.Listener<String>() {
+        SamlRequest samlRequest = new SamlRequest(loginStatus, Request.Method.GET, AzureUrls.SIGN_IN, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 Log.d(TAG,"SamlRequest response " + response);
-                Log.d(TAG, cookieStore.toString());
+                Log.d(TAG,"CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
                 performAuthenticate3601Request(loginStatus,response,email,password);
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d(TAG,"Error occured " + error);
-            }
-        });
+        }, volleyErrorListener);
 
         samlRequest.setShouldCache(false);
         queue.add(samlRequest);
     }
 
     private void performAuthenticate3601Request(final LoginStatus loginStatus, final String samlRequest,final String email,final String password){
-        Authenticate3601Request authenticate3601Request = new Authenticate3601Request(cookieStore,loginStatus,samlRequest, Request.Method.POST, ShopriteURLS.AUTHENTICATE3601, new Response.Listener<String>() {
+        Authenticate3601Request authenticate3601Request = new Authenticate3601Request(loginStatus,samlRequest, Request.Method.POST, ShopriteURLS.AUTHENTICATE3601, new Response.Listener<String>() {
 //        Authenticate3601Request authenticate3601Request = new Authenticate3601Request(cookieStore,loginStatus,samlRequest, Request.Method.POST, "http://192.168.64.1:8080", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 Log.d(TAG,"Authenticate3601Request response " + response);
-                Log.d(TAG,cookieStore.toString());
-                showProgress(false);
-                //performSamlResponseRequest(loginStatus,response, email, password);
+                Log.d(TAG,"CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
+                performSamlResponseRequest(loginStatus,response, email, password);
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d(TAG,error.toString());
-                showProgress(false);
-//                String body = null;
-                //get status code here
-//                String statusCode = String.valueOf(error.networkResponse.statusCode);
-//                //get response body and parse with appropriate encoding
-//                if(error.networkResponse.data!=null) {
-//                    try {
-//                        body = new String(error.networkResponse.data,"UTF-8");
-//                    } catch (UnsupportedEncodingException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//                if(body == null)
-//                    return;
-//                Log.d(TAG,"Error status code " + statusCode);
-//                VolleyUtils.logLongString(TAG,body);
-//                showProgress(false);
-            }
-        });
-        authenticate3601Request.setShouldCache(false);
-        authenticate3601Request.setRetryPolicy(new DefaultRetryPolicy(10000, 0, 1.0f));
+        }, volleyErrorListener);
         queue.add(authenticate3601Request);
     }
 
     private void performSamlResponseRequest(final LoginStatus loginStatus, final String response, final String email, final String password){
-        SamlResponse samlResponse = new SamlResponse(cookieStore,loginStatus,response,email,password, Request.Method.POST, ShopriteURLS.AUTHENTICATE, new Response.Listener<String>() {
+        SamlResponse samlResponse = new SamlResponse(loginStatus,response,email,password, Request.Method.POST, ShopriteURLS.AUTHENTICATE, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 Log.d(TAG,"SamlResponse response " + response);
-                Log.d(TAG,cookieStore.toString());
-                peformSignInVerifyRequest(loginStatus,response);
+                Log.d(TAG,"CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
+                performSignInVerifyRequest(loginStatus,response);
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d(TAG,"Error occured " + error);
-            }
-        });
+        },volleyErrorListener);
 
         queue.add(samlResponse);
     }
 
-    private void peformSignInVerifyRequest(final LoginStatus loginStatus, final String response){
-        VerifySignInRequest verifySignInRequest = new VerifySignInRequest(cookieStore,loginStatus,response, Request.Method.POST, AzureUrls.RETURN_FROM_SIGN_IN, new Response.Listener<String>() {
+    private void performSignInVerifyRequest(final LoginStatus loginStatus, final String response){
+        VerifySignInRequest verifySignInRequest = new VerifySignInRequest(loginStatus, response, Request.Method.POST, AzureUrls.RETURN_FROM_SIGN_IN, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                Log.d(TAG,"VerifySignInRequest response " + response);
-                Log.d(TAG, cookieStore.toString());
+                Log.d(TAG, "VerifySignInRequest response " + response);
+                Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
 
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d(TAG,"Error occured " + error);
+                final int status = error.networkResponse.statusCode;
+                Log.d(TAG, "deliverError is expected for https to http redirects. error: " + status);
+
+                /*
+                * The following redirect may be pointless
+                * */
+                // Handle 30x
+                if(HttpURLConnection.HTTP_MOVED_PERM == status || status == HttpURLConnection.HTTP_MOVED_TEMP || status == HttpURLConnection.HTTP_SEE_OTHER) {
+                    final String location = error.networkResponse.headers.get("Location");
+                    Log.d(TAG, "Location: " + location);
+                    performSignInVerifyRedirectRequest(location);
+
+                }
             }
         });
 
+        verifySignInRequest.setRetryPolicy(new DefaultRetryPolicy(5000, 3, 1.0f));
         queue.add(verifySignInRequest);
+    }
+
+    private void performSignInVerifyRedirectRequest(String location){
+        VerifySignInRedirectRequest request = new VerifySignInRedirectRequest(Request.Method.GET, location, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, "VerifySignInRedirectRequest response " + response);
+                Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
+            }
+        },volleyErrorListener);
+        queue.add(request);
     }
 
 

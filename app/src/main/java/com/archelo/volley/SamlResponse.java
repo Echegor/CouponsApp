@@ -18,12 +18,10 @@ public class SamlResponse extends StringRequest {
     public final String TAG = "SamlResponse";
     private final String email;
     private final String password;
-    private CookieStore cookieStore;
     private LoginStatus loginStatus;
     private String request;
-    public SamlResponse(CookieStore cookieStore, LoginStatus loginStatus, String request,String email,String password, int method, String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
+    public SamlResponse( LoginStatus loginStatus, String request,String email,String password, int method, String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
         super(method, url, listener, errorListener);
-        this.cookieStore = cookieStore;
         this.loginStatus = loginStatus;
         this.request = request;
         this.email = email;
@@ -37,8 +35,7 @@ public class SamlResponse extends StringRequest {
     @Override
     protected Response<String> parseNetworkResponse(NetworkResponse response) {
         List<Header> headers =  response.allHeaders;
-        Log.d(TAG,"Headers: \n" +headers.toString().replaceAll("],",",\r\n"));
-        cookieStore.parseHeaders(headers,getUrl());
+        Log.d(TAG, "Response code " + response.statusCode +" Headers: \n" + headers.toString().replaceAll("],", ",\r\n"));
         return super.parseNetworkResponse(response);
     }
 
@@ -57,11 +54,9 @@ public class SamlResponse extends StringRequest {
         headers.put("Accept-Language", "en-US,en;q=0.9");
         headers.put("Connection", "keep-alive");
         headers.put("Upgrade-Insecure-Requests", "1");
-
         headers.put("Host", "secure.shoprite.com");
         headers.put("Origin", "https://secure.shoprite.com");
         headers.put("Referer", "https://secure.shoprite.com/User/SignIn/3601");
-        headers.put("Cookie",cookieStore.getCookies(getUrl()));
         //Log.d(TAG,"getHeaders " + headers);
         return headers;
     }
@@ -82,12 +77,7 @@ public class SamlResponse extends StringRequest {
 
     @Override
     public String getBodyContentType() {
-        return super.getBodyContentType();
-    }
-
-    @Override
-    public byte[] getBody() throws AuthFailureError {
-        return super.getBody();
+        return "application/x-www-form-urlencoded";
     }
 
 

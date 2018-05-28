@@ -12,8 +12,11 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import java.io.UnsupportedEncodingException;
+import java.net.CookieManager;
+import java.net.HttpCookie;
 import java.net.URLEncoder;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public class VolleyUtils {
@@ -135,6 +138,15 @@ public class VolleyUtils {
             }
         }
 
+        return builder.toString();
+    }
+
+    public static String logCookies(CookieManager cookieManager){
+        StringBuilder builder = new StringBuilder();
+        List<HttpCookie> cookies= cookieManager.getCookieStore().getCookies();
+        for(HttpCookie cookie : cookies){
+            builder.append(cookie).append(System.lineSeparator());
+        }
         return builder.toString();
     }
 
