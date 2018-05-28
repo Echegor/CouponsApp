@@ -320,12 +320,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
-        verifySignInRequest.setRetryPolicy(new DefaultRetryPolicy(5000, 3, 1.0f));
         queue.add(verifySignInRequest);
     }
 
     private void performSignInVerifyRedirectRequest(String location){
-        VerifySignInRedirectRequest request = new VerifySignInRedirectRequest(Request.Method.GET, location, new Response.Listener<String>() {
+        VerifySignInRedirectRequest request = new VerifySignInRedirectRequest(location, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 Log.d(TAG, "VerifySignInRedirectRequest response " + response);

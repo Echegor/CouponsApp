@@ -17,7 +17,6 @@ import java.util.Map;
 
 public class SamlRequest extends StringRequest {
     public final String TAG = "SamlRequest";
-    public final String HEADER_CONTENT_TYPE = "Content-Type";
     private LoginStatus loginStatus;
     public SamlRequest(LoginStatus loginStatus, int method, String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
         super(method, url, listener, errorListener);
