@@ -1,12 +1,6 @@
 package com.archelo.shoprite.coupons.json;
 
-import android.content.Intent;
-import android.os.AsyncTask;
-
-import com.archelo.shoprite.coupons.LoginActivity;
-import com.archelo.shoprite.coupons.MainActivity;
-import com.archelo.shoprite.coupons.http.StateSaver;
-import com.archelo.shoprite.coupons.utils.HttpUtils;
+//import com.archelo.shoprite.coupons.http.StateSaver;
 
 import java.io.Serializable;
 

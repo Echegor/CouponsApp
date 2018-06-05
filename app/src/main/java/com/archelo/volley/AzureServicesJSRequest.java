@@ -18,6 +18,7 @@ import java.util.Map;
  * */
 public class AzureServicesJSRequest extends StringRequest {
     public final String TAG = "AzureServicesJSRequest";
+
     public AzureServicesJSRequest(String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
         super(url, listener, errorListener);
     }

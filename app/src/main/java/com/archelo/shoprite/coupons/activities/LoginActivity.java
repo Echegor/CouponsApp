@@ -1,16 +1,17 @@
-package com.archelo.shoprite.coupons;
+package com.archelo.shoprite.coupons.activities;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -28,19 +29,27 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
-import com.archelo.shoprite.coupons.http.StateSaver;
+import com.archelo.db.DbHelper;
+import com.archelo.shoprite.coupons.json.AzureToken;
+import com.archelo.shoprite.coupons.json.AzureUserInfo;
+import com.archelo.shoprite.coupons.json.Coupon;
 import com.archelo.shoprite.coupons.json.LoginStatus;
+import com.archelo.shoprite.coupons.json.UserCoupons;
+import com.archelo.shoprite.coupons.states.CookieManagerState;
 import com.archelo.shoprite.coupons.urls.AzureUrls;
 import com.archelo.shoprite.coupons.urls.ShopriteURLS;
-import com.archelo.shoprite.coupons.utils.HttpUtils;
 import com.archelo.volley.Authenticate3601Request;
+import com.archelo.volley.AvailableCouponsRequest;
+import com.archelo.volley.AzureServicesJSRequest;
+import com.archelo.volley.AzureSessionRequest;
+import com.archelo.volley.ProxiedHurlStack;
 import com.archelo.volley.SamlRequest;
 import com.archelo.volley.SamlResponse;
 import com.archelo.volley.StatusRequest;
@@ -51,10 +60,10 @@ import com.example.rtl1e.shopritecoupons.R;
 import com.google.gson.Gson;
 
 import java.net.CookieHandler;
-import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static android.Manifest.permission.READ_CONTACTS;
@@ -77,10 +86,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             "foo@example.com:hello", "bar@example.com:world"
     };
     private static final String TAG = "LoginActivity";
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-    private UserLoginTask mAuthTask = null;
 
     // UI references.
     private AutoCompleteTextView mEmailView;
@@ -89,12 +94,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private View mLoginFormView;
 
     private RequestQueue queue;
-    private CookieManager cookieManager = new CookieManager();
+    private CookieManagerState cookieManager = new CookieManagerState();
 
+    private Toast lastToast;
     private Response.ErrorListener volleyErrorListener = new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError error) {
-            Log.d(TAG,"Error occured " + error);
+            Log.d(TAG, "Error occured " + error);
             showProgress(false);
         }
     };
@@ -105,10 +111,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         setContentView(R.layout.activity_login);
         // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+        mEmailView = findViewById(R.id.email);
         populateAutoComplete();
 
-        mPasswordView = (EditText) findViewById(R.id.password);
+        mPasswordView = findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
@@ -120,7 +126,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+        Button mEmailSignInButton = findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -131,14 +137,48 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
-        //queue = Volley.newRequestQueue(this,new ProxiedHurlStack());
+
         //Httpurlconnection queries cookiemanager for cookies
-        cookieManager.setCookiePolicy( CookiePolicy.ACCEPT_ALL );
+        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
         CookieHandler.setDefault(cookieManager);
-        queue = Volley.newRequestQueue(this);
+
+//        queue = Volley.newRequestQueue(this);
+        queue = Volley.newRequestQueue(this, new ProxiedHurlStack());
 
 
+    }
 
+    public long performSave(String entry) {
+        DbHelper database = null;
+        SQLiteDatabase db = null;
+//        AppDat
+        try {
+            Log.d(TAG, "Saving entry");
+            database = new DbHelper(LoginActivity.this);
+            db = database.getWritableDatabase();
+            ContentValues values = new ContentValues();
+//            values.put(DbHelperContract.DbEntry.COLUMN_NAME_START_TIME,entry.getStartTime().getTime());
+//            values.put(DbHelperContract.DbEntry.COLUMN_NAME_END_TIME,entry.getEndTime().getTime());
+//            values.put(DbHelperContract.DbEntry.COLUMN_NAME_BREAK_DURATION,entry.getBreakDuration());
+//            values.put(DbHelperContract.DbEntry.COLUMN_NAME_BREAK_TICKED,entry.getBreakValue());
+//            values.put(DbHelperContract.DbEntry.COLUMN_NAME_NOTES,entry.getNotes());
+//            values.put(DbHelperContract.DbEntry.COLUMN_NAME_SAVED_DATE,entry.getDateCreated().getTime());
+//            values.put(DbHelperContract.DbEntry.COLUMN_NAME_HOURS_WORKED,entry.getScaledHours());
+//            values.put(DbHelperContract.DbEntry.COLUMN_NAME_MONEY_EARNED,entry.getScaledMoney());
+
+            Log.d(TAG, "Saving " + values.toString());
+//            return db.insertWithOnConflict(DbHelperContract.DbEntry.TABLE_NAME, null, values,SQLiteDatabase.CONFLICT_REPLACE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (database != null) {
+                database.close();
+            }
+            if (db != null) {
+                db.close();
+            }
+        }
+        return -1;
     }
 
     private void populateAutoComplete() {
@@ -184,6 +224,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
+    private void showToast(CharSequence text) {
+        if (lastToast != null) {
+            lastToast.cancel();
+        }
+        lastToast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG);
+        lastToast.show();
+    }
+
 
     /**
      * Attempts to sign in or register the account specified by the login form.
@@ -191,10 +239,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
-        }
-
         // Reset errors.
         mEmailView.setError(null);
         mPasswordView.setError(null);
@@ -233,33 +277,35 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // perform the user login attempt.
             cookieManager.getCookieStore().removeAll();
             showProgress(true);
-            performLogin(email,password);
+            performLogin(email, password);
 //            mAuthTask = new UserLoginTask(email, password);
 //            mAuthTask.execute((Void) null);
         }
     }
 
-    private void performLogin(final String email,final String password) {
+    private void performLogin(final String email, final String password) {
+        showToast("Performing StatusRequest");
         StatusRequest statusRequest = new StatusRequest(Request.Method.GET, ShopriteURLS.STATUS, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                Log.d(TAG,"StatusRequest response " + response);
-                Log.d(TAG,"CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
-                LoginStatus loginStatus = new Gson().fromJson(response,LoginStatus.class);
-                performSamlRequest(loginStatus,email,password);
+                Log.d(TAG, "StatusRequest response " + response);
+                Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
+                LoginStatus loginStatus = new Gson().fromJson(response, LoginStatus.class);
+                performSamlRequest(loginStatus, email, password);
             }
-        },volleyErrorListener );
+        }, volleyErrorListener);
         statusRequest.setShouldCache(false);
         queue.add(statusRequest);
     }
 
-    private void performSamlRequest(final LoginStatus loginStatus, final String email, final String password){
+    private void performSamlRequest(final LoginStatus loginStatus, final String email, final String password) {
+        showToast("Performing SamlRequest");
         SamlRequest samlRequest = new SamlRequest(loginStatus, Request.Method.GET, AzureUrls.SIGN_IN, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                Log.d(TAG,"SamlRequest response " + response);
-                Log.d(TAG,"CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
-                performAuthenticate3601Request(loginStatus,response,email,password);
+                Log.d(TAG, "SamlRequest response " + response);
+                Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
+                performAuthenticate3601Request(loginStatus, response, email, password);
             }
         }, volleyErrorListener);
 
@@ -267,33 +313,35 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         queue.add(samlRequest);
     }
 
-    private void performAuthenticate3601Request(final LoginStatus loginStatus, final String samlRequest,final String email,final String password){
-        Authenticate3601Request authenticate3601Request = new Authenticate3601Request(loginStatus,samlRequest, Request.Method.POST, ShopriteURLS.AUTHENTICATE3601, new Response.Listener<String>() {
-//        Authenticate3601Request authenticate3601Request = new Authenticate3601Request(cookieStore,loginStatus,samlRequest, Request.Method.POST, "http://192.168.64.1:8080", new Response.Listener<String>() {
+    private void performAuthenticate3601Request(final LoginStatus loginStatus, final String samlRequest, final String email, final String password) {
+        showToast("Performing Authenticate3601Request");
+        Authenticate3601Request authenticate3601Request = new Authenticate3601Request(loginStatus, samlRequest, Request.Method.POST, ShopriteURLS.AUTHENTICATE3601, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                Log.d(TAG,"Authenticate3601Request response " + response);
-                Log.d(TAG,"CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
-                performSamlResponseRequest(loginStatus,response, email, password);
+                Log.d(TAG, "Authenticate3601Request response " + response);
+                Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
+                performSamlResponseRequest(loginStatus, response, email, password);
             }
         }, volleyErrorListener);
         queue.add(authenticate3601Request);
     }
 
-    private void performSamlResponseRequest(final LoginStatus loginStatus, final String response, final String email, final String password){
-        SamlResponse samlResponse = new SamlResponse(loginStatus,response,email,password, Request.Method.POST, ShopriteURLS.AUTHENTICATE, new Response.Listener<String>() {
+    private void performSamlResponseRequest(final LoginStatus loginStatus, final String response, final String email, final String password) {
+        showToast("Performing SamlResponse");
+        SamlResponse samlResponse = new SamlResponse(loginStatus, response, email, password, Request.Method.POST, ShopriteURLS.AUTHENTICATE, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                Log.d(TAG,"SamlResponse response " + response);
-                Log.d(TAG,"CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
-                performSignInVerifyRequest(loginStatus,response);
+                Log.d(TAG, "SamlResponse response " + response);
+                Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
+                performSignInVerifyRequest(loginStatus, response);
             }
-        },volleyErrorListener);
+        }, volleyErrorListener);
 
         queue.add(samlResponse);
     }
 
-    private void performSignInVerifyRequest(final LoginStatus loginStatus, final String response){
+    private void performSignInVerifyRequest(final LoginStatus loginStatus, final String response) {
+        showToast("Verifying sign in");
         VerifySignInRequest verifySignInRequest = new VerifySignInRequest(loginStatus, response, Request.Method.POST, AzureUrls.RETURN_FROM_SIGN_IN, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -308,13 +356,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 Log.d(TAG, "deliverError is expected for https to http redirects. error: " + status);
 
                 /*
-                * The following redirect may be pointless
-                * */
+                 * The following redirect may be pointless
+                 * */
                 // Handle 30x
-                if(HttpURLConnection.HTTP_MOVED_PERM == status || status == HttpURLConnection.HTTP_MOVED_TEMP || status == HttpURLConnection.HTTP_SEE_OTHER) {
+                if (HttpURLConnection.HTTP_MOVED_PERM == status || status == HttpURLConnection.HTTP_MOVED_TEMP || status == HttpURLConnection.HTTP_SEE_OTHER) {
                     final String location = error.networkResponse.headers.get("Location");
                     Log.d(TAG, "Location: " + location);
-                    performSignInVerifyRedirectRequest(location);
+                    performSignInVerifyRedirectRequest(location, loginStatus);
 
                 }
             }
@@ -323,17 +371,98 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         queue.add(verifySignInRequest);
     }
 
-    private void performSignInVerifyRedirectRequest(String location){
+    private void performSignInVerifyRedirectRequest(String location, final LoginStatus loginStatus) {
+        showToast("Verifying redirect request");
         VerifySignInRedirectRequest request = new VerifySignInRedirectRequest(location, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 Log.d(TAG, "VerifySignInRedirectRequest response " + response);
                 Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
+                performAzureJSRequest(loginStatus);
             }
-        },volleyErrorListener);
+        }, volleyErrorListener);
+        queue.add(request);
+
+    }
+
+    private void performAzureJSRequest(final LoginStatus loginStatus) {
+        showToast("Fetching azure token");
+        AzureServicesJSRequest request = new AzureServicesJSRequest(ShopriteURLS.WEB_JS, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, "AzureServicesJSRequest response " + response);
+                showToast("Parsing azure token");
+                int index = response.indexOf(AzureToken.AUTHORIZATION);
+                int endIndex = response.indexOf("&", index);
+                String authorization = response.substring(index + 14, endIndex);
+
+                index = response.indexOf(AzureToken.ZUMO_APPLICATION_TOKEN);
+                endIndex = response.indexOf("\"", index + AzureToken.ZUMO_APPLICATION_TOKEN.length());
+                String zumoApplicationToken = response.substring(index + AzureToken.ZUMO_APPLICATION_TOKEN.length(), endIndex);
+                AzureToken azureToken = new AzureToken.AzureTokenBuilder()
+                        .authorization(authorization)
+                        .userID(loginStatus.getUserId())
+                        .zumoApplicationToken(zumoApplicationToken)
+                        .signInStatus(loginStatus.isSignedIn())
+                        .build();
+
+                Log.d(TAG, azureToken.toString());
+                performAzureSessionRequest(azureToken);
+            }
+        }, volleyErrorListener);
         queue.add(request);
     }
 
+    private void performAzureSessionRequest(final AzureToken azureToken) {
+        showToast("Performing Azure Session Request");
+        AzureSessionRequest request = new AzureSessionRequest(azureToken, AzureUrls.SESSION, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, "performAzureSessionRequest response " + response);
+                Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
+                AzureUserInfo userInfo = new Gson().fromJson(response, AzureUserInfo.class);
+                Log.d(TAG, userInfo.toString());
+                performAvailableCouponsRequest(azureToken, userInfo);
+            }
+        }, volleyErrorListener);
+        queue.add(request);
+    }
+
+    private void performAvailableCouponsRequest(final AzureToken azureToken, final AzureUserInfo azureUserInfo) {
+        showToast("Performing Available coupons Request");
+        AvailableCouponsRequest request = new AvailableCouponsRequest(azureToken, azureUserInfo, Request.Method.POST, AzureUrls.AVAILABLE_COUPONS, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, "performAvailableCouponsRequest response " + response);
+                Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
+                UserCoupons userCoupons = new Gson().fromJson(response, UserCoupons.class);
+                Log.d(TAG, userCoupons.toString());
+                performAllCouponsRequest(azureToken, azureUserInfo, userCoupons);
+            }
+        }, volleyErrorListener);
+        queue.add(request);
+    }
+
+    private void performAllCouponsRequest(final AzureToken azureToken, final AzureUserInfo azureUserInfo, final UserCoupons userCoupons) {
+        showToast("Performing db fetch");
+        AvailableCouponsRequest request = new AvailableCouponsRequest(azureToken, azureUserInfo, Request.Method.POST, AzureUrls.COUPONS_METADATA, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, "request response " + response);
+                Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
+                Coupon[] couponsArray = new Gson().fromJson(response, Coupon[].class);
+                Log.d(TAG, Arrays.toString(couponsArray));
+
+
+                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                intent.putExtra(CookieManagerState.COOKIE_STATE, cookieManager);
+
+                Log.d(TAG, "Starting activity");
+                startActivity(intent);
+            }
+        }, volleyErrorListener);
+        queue.add(request);
+    }
 
     private boolean isEmailValid(String email) {
         //TODO: Replace this with your own logic
@@ -435,49 +564,5 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         int IS_PRIMARY = 1;
     }
 
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, StateSaver> {
-
-        private final String mEmail;
-        private final String mPassword;
-
-        UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
-        }
-
-        @Override
-        protected StateSaver doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
-            // TODO: register the new account here.
-            return HttpUtils.performAzureSignIn(mEmail,mPassword);
-        }
-
-        @Override
-        protected void onPostExecute(final StateSaver stateSaver) {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (!stateSaver.isError()) {
-//                finish();
-                Intent intent = new Intent(LoginActivity.this,MainActivity.class);
-                intent.putExtra(StateSaver.class.getName(),stateSaver);
-                startActivity(intent);
-            } else {
-                mPasswordView.setError(stateSaver.getErrorString());
-                mPasswordView.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
-    }
 }
 

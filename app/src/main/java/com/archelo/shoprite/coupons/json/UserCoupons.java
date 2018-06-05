@@ -4,8 +4,9 @@ import java.io.Serializable;
 import java.util.List;
 
 public class UserCoupons implements Serializable{
-    List<String> available_ids_array;
-    List<String> clipped_active_ids_array;
+    public static final String USER_COUPONS = "USER_COUPONS";
+    private List<String> available_ids_array;
+    private List<String> clipped_active_ids_array;
 
     public List<String> getAvailable_ids_array() {
         return available_ids_array;

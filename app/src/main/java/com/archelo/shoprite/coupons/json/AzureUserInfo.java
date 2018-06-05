@@ -3,6 +3,7 @@ package com.archelo.shoprite.coupons.json;
 import java.io.Serializable;
 
 public class AzureUserInfo implements Serializable {
+    public static final String AZURE_USER_INFO = "AZURE_USER_INFO";
     private String SSOUrl;
     private String Active;
     private String Message;

@@ -7,6 +7,7 @@ import java.io.Serializable;
  */
 
 public class Coupon implements Serializable {
+    public static final String COUPON = "COUPON";
     private String id;
     private String coupon_id;
     private String featured;

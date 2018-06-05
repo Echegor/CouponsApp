@@ -2,7 +2,8 @@ package com.archelo.shoprite.coupons.json;
 
 import java.io.Serializable;
 
-public class AzureToken  implements Serializable{
+public class AzureToken implements Serializable {
+    public static String AZURE_TOKEN = "AZURE_TOKEN";
     public final static String AUTHORIZATION = "Authorization";
     public final static String ZUMO_APPLICATION_TOKEN = "\"X-ZUMO-APPLICATION\":\"";
     private final String authorization;

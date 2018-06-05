@@ -3,6 +3,7 @@ package com.archelo.shoprite.coupons.json;
 import java.io.Serializable;
 
 public class UserInfo implements Serializable{
+    public static String USER_INFO = "USER_INFO";
     private String Email;
     private String FSN;
     private String FirstName;
