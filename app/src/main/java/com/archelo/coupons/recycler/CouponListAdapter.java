@@ -40,7 +40,7 @@ public class CouponListAdapter extends RecyclerView.Adapter<CouponListAdapter.Co
     public void onBindViewHolder(@NonNull CouponViewHolder holder, int position) {
         if (mCoupons != null) {
             Coupon current = mCoupons.get(position);
-            holder.wordItemView.setText(current.getShort_description());
+            holder.wordItemView.setText( current.isClipped() +" "+ current.getShort_description());
         } else {
             // Covers the case of data not being ready yet.
             holder.wordItemView.setText("No Coupon");

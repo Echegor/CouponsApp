@@ -199,12 +199,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
-    private void showToast(CharSequence text) {
+    private Toast showToast(CharSequence text) {
         if (lastToast != null) {
             lastToast.cancel();
         }
         lastToast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG);
         lastToast.show();
+        return lastToast;
     }
 
 
@@ -411,6 +412,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 Log.d(TAG, "performAvailableCouponsRequest response " + response);
                 Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
                 UserCoupons userCoupons = new Gson().fromJson(response, UserCoupons.class);
+                userCoupons.indexCoupons();
                 Log.d(TAG, userCoupons.toString());
                 performAllCouponsRequest(azureToken, azureUserInfo, userCoupons);
             }
@@ -428,6 +430,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 Coupon[] couponsArray = new Gson().fromJson(response, Coupon[].class);
                 Log.d(TAG, Arrays.toString(couponsArray));
 
+                for(Coupon coupon : couponsArray){
+                    coupon.setClipped(userCoupons.isClipped(coupon.getCoupon_id()));
+                }
+
                 List<HttpCookie> cookies = cookieManager.getCookieStore().getCookies();
                 Cookie[] cookie = new Cookie[cookies.size()];
                 for(int i = 0 ; i < cookies.size() ; i ++){
@@ -440,8 +446,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 mCouponViewModel.insert(couponsArray);
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
 
+                Toast toast = showToast("Done!");
                 Log.d(TAG, "Starting activity");
+
                 startActivity(intent);
+                toast.cancel();
             }
         }, volleyErrorListener);
         queue.add(request);

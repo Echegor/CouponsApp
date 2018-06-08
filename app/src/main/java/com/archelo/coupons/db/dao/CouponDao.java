@@ -18,7 +18,7 @@ public interface CouponDao {
     @Query("DELETE FROM coupon_table")
     void deleteAll();
 
-    @Query("SELECT * from coupon_table ORDER BY coupon_id ASC")
+    @Query("SELECT * from coupon_table ORDER BY clipped ASC")
     LiveData<List<Coupon>> getAllCoupons();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

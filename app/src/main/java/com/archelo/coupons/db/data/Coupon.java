@@ -41,6 +41,7 @@ public class Coupon {
     private String offer_priority;
     private String expiration_date;
     private String long_description_header;
+    private boolean clipped;
 
     @NonNull
     public String getId() {
@@ -49,6 +50,14 @@ public class Coupon {
 
     public void setId(@NonNull String id) {
         this.id = id;
+    }
+
+    public boolean isClipped() {
+        return clipped;
+    }
+
+    public void setClipped(boolean clipped) {
+        this.clipped = clipped;
     }
 
     public String getCoupon_id() {
