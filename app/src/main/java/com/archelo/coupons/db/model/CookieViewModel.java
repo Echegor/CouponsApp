@@ -30,4 +30,8 @@ public class CookieViewModel extends AndroidViewModel {
     public void insert(Cookie[] CookiesArray) {
         mRepository.insert(CookiesArray);
     }
+
+    public void deleteAll() {
+        mRepository.deleteAll();
+    }
 }

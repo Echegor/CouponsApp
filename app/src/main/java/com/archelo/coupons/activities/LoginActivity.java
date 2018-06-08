@@ -153,6 +153,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mCouponViewModel = ViewModelProviders.of(this).get(CouponViewModel.class);
         mCookieViewModel = ViewModelProviders.of(this).get(CookieViewModel.class);
+        mCookieViewModel.deleteAll();
     }
 
 

@@ -35,6 +35,24 @@ public class CookieRepository {
         new insertArrayAsyncTask(mCookieDao).execute(CookiesArray);
     }
 
+    public void deleteAll() {
+        new deleteAllAsyncTask(mCookieDao).execute();
+    }
+
+    private static class deleteAllAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        private CookieDao mAsyncTaskDao;
+
+        deleteAllAsyncTask(CookieDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+        @Override
+        protected Void doInBackground(final Void... params) {
+            mAsyncTaskDao.deleteAll();
+            return null;
+        }
+    }
     private static class insertAsyncTask extends AsyncTask<Cookie, Void, Void> {
 
         private CookieDao mAsyncTaskDao;
