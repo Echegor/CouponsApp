@@ -6,21 +6,21 @@ import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 
-import com.archelo.coupons.db.data.Coupon;
+import com.archelo.coupons.db.data.UserCoupon;
 
 import java.util.List;
 
 @Dao
-public interface CouponDao {
+public interface UserCouponDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insert(Coupon coupon);
+    void insert(UserCoupon coupon);
 
-    @Query("DELETE FROM coupon_table")
+    @Query("DELETE FROM user_coupons")
     void deleteAll();
 
-    @Query("SELECT * from coupon_table ORDER BY coupon_id ASC")
-    LiveData<List<Coupon>> getAllCoupons();
+    @Query("SELECT * from user_coupons ORDER BY coupon_id ASC")
+    LiveData<List<UserCoupon>> getAllCoupons();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insert(Coupon[] params);
+    void insert(UserCoupon[] params);
 }

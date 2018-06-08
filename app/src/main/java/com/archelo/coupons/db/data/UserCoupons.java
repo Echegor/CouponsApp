@@ -14,6 +14,10 @@ public class UserCoupons {
         return clipped_active_ids_array;
     }
 
+    public int getCombinedSize(){
+        return available_ids_array.size() + clipped_active_ids_array.size();
+    }
+
 
     @Override
     public String toString() {

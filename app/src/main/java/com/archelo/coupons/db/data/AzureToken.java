@@ -2,10 +2,12 @@ package com.archelo.coupons.db.data;
 
 
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
 
 @Entity(tableName = "azure_token_table")
 public class AzureToken {
-
+    @PrimaryKey(autoGenerate = true)
+    private Integer id;
     public final static String AUTHORIZATION = "Authorization";
     public final static String ZUMO_APPLICATION_TOKEN = "\"X-ZUMO-APPLICATION\":\"";
     private final String authorization;
@@ -30,10 +32,6 @@ public class AzureToken {
 
     public String getZumoApplicationToken() {
         return zumoApplicationToken;
-    }
-
-    public boolean isSignedIn() {
-        return isSignedIn;
     }
 
     public String toString() {

@@ -2,9 +2,12 @@ package com.archelo.coupons.db.data;
 
 
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
 
 @Entity(tableName = "azure_user_table")
 public class AzureUserInfo {
+    @PrimaryKey(autoGenerate = true)
+    private Integer id;
     private String SSOUrl;
     private String Active;
     private String Message;

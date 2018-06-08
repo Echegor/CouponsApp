@@ -18,7 +18,7 @@ public class CouponRepository {
     public CouponRepository(Application application) {
         CouponAppRoomDatabase db = CouponAppRoomDatabase.getDatabase(application);
         mCouponDao = db.couponDao();
-        mAllCoupons = mCouponDao.getAllCookies();
+        mAllCoupons = mCouponDao.getAllCoupons();
     }
 
     public LiveData<List<Coupon>> getAllCoupons() {
