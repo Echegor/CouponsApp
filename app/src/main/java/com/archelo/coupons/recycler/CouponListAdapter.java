@@ -1,6 +1,7 @@
 package com.archelo.coupons.recycler;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,24 +29,25 @@ public class CouponListAdapter extends RecyclerView.Adapter<CouponListAdapter.Co
 
     public CouponListAdapter(Context context) { mInflater = LayoutInflater.from(context); }
 
+    @NonNull
     @Override
-    public CouponViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public CouponViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View itemView = mInflater.inflate(R.layout.recyclerview_item, parent, false);
         return new CouponViewHolder(itemView);
     }
 
     @Override
-    public void onBindViewHolder(CouponViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull CouponViewHolder holder, int position) {
         if (mCoupons != null) {
             Coupon current = mCoupons.get(position);
-            holder.wordItemView.setText(current.getBrand_name());
+            holder.wordItemView.setText(current.getShort_description());
         } else {
             // Covers the case of data not being ready yet.
             holder.wordItemView.setText("No Coupon");
         }
     }
 
-    void setCoupons(List<Coupon> words){
+    public void setCoupons(List<Coupon> words){
         mCoupons = words;
         notifyDataSetChanged();
     }

@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
@@ -36,9 +37,12 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 import com.archelo.coupons.db.data.AzureToken;
 import com.archelo.coupons.db.data.AzureUserInfo;
+import com.archelo.coupons.db.data.Cookie;
 import com.archelo.coupons.db.data.Coupon;
 import com.archelo.coupons.db.data.LoginStatus;
 import com.archelo.coupons.db.data.UserCoupons;
+import com.archelo.coupons.db.model.CookieViewModel;
+import com.archelo.coupons.db.model.CouponViewModel;
 import com.archelo.coupons.states.CookieManagerState;
 import com.archelo.coupons.urls.AzureUrls;
 import com.archelo.coupons.urls.ShopriteURLS;
@@ -58,6 +62,7 @@ import com.google.gson.Gson;
 
 import java.net.CookieHandler;
 import java.net.CookiePolicy;
+import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -102,6 +107,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     };
 
+    private CouponViewModel mCouponViewModel;
+    private CookieViewModel mCookieViewModel;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -139,10 +148,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
         CookieHandler.setDefault(cookieManager);
 
-//        queue = Volley.newRequestQueue(this);
-        queue = Volley.newRequestQueue(this, new ProxiedHurlStack());
+        queue = Volley.newRequestQueue(this);
+//        queue = Volley.newRequestQueue(this, new ProxiedHurlStack());
 
-
+        mCouponViewModel = ViewModelProviders.of(this).get(CouponViewModel.class);
+        mCookieViewModel = ViewModelProviders.of(this).get(CookieViewModel.class);
     }
 
 
@@ -418,12 +428,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 Coupon[] couponsArray = new Gson().fromJson(response, Coupon[].class);
                 Log.d(TAG, Arrays.toString(couponsArray));
 
-
+                List<HttpCookie> cookies = cookieManager.getCookieStore().getCookies();
+                Cookie[] cookie = new Cookie[cookies.size()];
+                for(int i = 0 ; i < cookies.size() ; i ++){
+                    cookie[i] = new Cookie(cookies.get(i));
+                }
+                mCookieViewModel.insert(cookie);
+                mCouponViewModel.insert(couponsArray);
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                intent.putExtra(CookieManagerState.COOKIE_STATE, cookieManager);
 
                 Log.d(TAG, "Starting activity");
-                startActivity(intent);
+                //startActivity(intent);
             }
         }, volleyErrorListener);
         queue.add(request);

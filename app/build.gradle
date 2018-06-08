@@ -54,6 +54,12 @@ dependencies {
     annotationProcessor "android.arch.persistence.room:compiler:1.1.0"
     testImplementation "android.arch.persistence.room:testing:1.1.0"
     implementation "android.arch.lifecycle:livedata:1.1.1"
+    implementation "android.arch.lifecycle:extensions:1.1.1"
+
+    /*
+    * adb forward tcp:8080 tcp:8080 and then open http://localhost:8080
+    * */
+    debugImplementation 'com.amitshekhar.android:debug-db:1.0.1'
 
 
 }

@@ -1,7 +1,10 @@
 package com.archelo.coupons.activities;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -21,6 +24,7 @@ import com.archelo.coupons.db.data.AzureToken;
 import com.archelo.coupons.db.data.AzureUserInfo;
 import com.archelo.coupons.db.data.Coupon;
 import com.archelo.coupons.db.data.UserCoupons;
+import com.archelo.coupons.db.model.CouponViewModel;
 import com.archelo.coupons.recycler.CouponListAdapter;
 import com.archelo.coupons.states.CookieManagerState;
 import com.archelo.coupons.urls.AzureUrls;
@@ -31,6 +35,7 @@ import com.example.rtl1e.shopritecoupons.R;
 
 import java.net.CookieHandler;
 import java.util.Arrays;
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -53,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
 //            showProgress(false);
         }
     };
+    private CouponViewModel mCouponViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,10 +68,20 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+
         RecyclerView recyclerView = findViewById(R.id.recyclerview);
         final CouponListAdapter adapter = new CouponListAdapter(this);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        mCouponViewModel = ViewModelProviders.of(this).get(CouponViewModel.class);
+        mCouponViewModel.getAllCoupons().observe(this, new Observer<List<Coupon>>() {
+            @Override
+            public void onChanged(@Nullable final List<Coupon> words) {
+                // Update the cached copy of the words in the adapter.
+                adapter.setCoupons(words);
+            }
+        });
 
     }
 

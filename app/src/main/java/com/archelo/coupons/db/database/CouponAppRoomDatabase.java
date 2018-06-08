@@ -6,22 +6,25 @@ import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 
 import com.archelo.coupons.db.dao.CouponDao;
+import com.archelo.coupons.db.dao.CookieDao;
+import com.archelo.coupons.db.data.Cookie;
 import com.archelo.coupons.db.data.Coupon;
 
-@Database(entities = {Coupon.class}, version = 1)
-public abstract class CouponRoomDatabase extends RoomDatabase {
-
+@Database(entities = {Coupon.class, Cookie.class}, version = 1)
+public abstract class CouponAppRoomDatabase extends RoomDatabase {
+    public static final String DATABASE_NAME = "coupon_app_database";
     public abstract CouponDao couponDao();
+    public abstract CookieDao cookieDao();
 
-    private static CouponRoomDatabase INSTANCE;
+    private static CouponAppRoomDatabase INSTANCE;
 
 
-    public static CouponRoomDatabase getDatabase(final Context context) {
+    public static CouponAppRoomDatabase getDatabase(final Context context) {
         if (INSTANCE == null) {
-            synchronized (CouponRoomDatabase.class) {
+            synchronized (CouponAppRoomDatabase.class) {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
-                            CouponRoomDatabase.class, "coupon_database")
+                            CouponAppRoomDatabase.class, DATABASE_NAME)
                             .build();
 
                 }
@@ -31,3 +34,5 @@ public abstract class CouponRoomDatabase extends RoomDatabase {
     }
 
 }
+
+
