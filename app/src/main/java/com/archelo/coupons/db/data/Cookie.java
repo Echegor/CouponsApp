@@ -4,6 +4,8 @@ import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 
 import java.net.HttpCookie;
+import java.util.Calendar;
+import java.util.Date;
 
 @Entity(tableName = "cookie_table")
 public class Cookie {
@@ -23,8 +25,10 @@ public class Cookie {
     private String name;
     private String value;
     private int version;
+    private String date;
 
-    public Cookie(String comment, String commentURL, boolean discard, String portlist, String domain, long maxAge, String path, boolean secure, String name, String value, int version) {
+    public Cookie(Integer id, String comment, String commentURL, boolean discard, String portlist, String domain, long maxAge, String path, boolean secure, String name, String value, int version, String date) {
+        this.id = id;
         this.comment = comment;
         this.commentURL = commentURL;
         this.discard = discard;
@@ -36,6 +40,7 @@ public class Cookie {
         this.name = name;
         this.value = value;
         this.version = version;
+        this.date = date;
     }
 
     public Cookie(HttpCookie httpCookie) {
@@ -50,6 +55,29 @@ public class Cookie {
         this.name = httpCookie.getName();
         this.value = httpCookie.getValue();
         this.version = httpCookie.getVersion();
+        this.date = new Date().toString();
+    }
+
+    public HttpCookie getAsHttpCookie(){
+        HttpCookie httpCookie = new HttpCookie(name,value);
+        httpCookie.setComment(comment);
+        httpCookie.setCommentURL(commentURL);
+        httpCookie.setDiscard(discard);
+        httpCookie.setPortlist(portlist);
+        httpCookie.setDomain(domain);
+        httpCookie.setMaxAge(maxAge);
+        httpCookie.setPath(path);
+        httpCookie.setSecure(secure);
+        httpCookie.setVersion(version);
+        return httpCookie;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
     }
 
     public Integer getId() {

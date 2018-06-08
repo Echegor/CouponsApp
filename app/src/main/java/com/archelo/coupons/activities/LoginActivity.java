@@ -43,14 +43,12 @@ import com.archelo.coupons.db.data.LoginStatus;
 import com.archelo.coupons.db.data.UserCoupons;
 import com.archelo.coupons.db.model.CookieViewModel;
 import com.archelo.coupons.db.model.CouponViewModel;
-import com.archelo.coupons.states.CookieManagerState;
 import com.archelo.coupons.urls.AzureUrls;
 import com.archelo.coupons.urls.ShopriteURLS;
 import com.archelo.coupons.volley.Authenticate3601Request;
 import com.archelo.coupons.volley.AvailableCouponsRequest;
 import com.archelo.coupons.volley.AzureServicesJSRequest;
 import com.archelo.coupons.volley.AzureSessionRequest;
-import com.archelo.coupons.volley.ProxiedHurlStack;
 import com.archelo.coupons.volley.SamlRequest;
 import com.archelo.coupons.volley.SamlResponse;
 import com.archelo.coupons.volley.StatusRequest;
@@ -61,6 +59,7 @@ import com.example.rtl1e.shopritecoupons.R;
 import com.google.gson.Gson;
 
 import java.net.CookieHandler;
+import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.HttpCookie;
 import java.net.HttpURLConnection;
@@ -96,7 +95,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private View mLoginFormView;
 
     private RequestQueue queue;
-    private CookieManagerState cookieManager = new CookieManagerState();
+    private CookieManager cookieManager = new CookieManager();
 
     private Toast lastToast;
     private Response.ErrorListener volleyErrorListener = new Response.ErrorListener() {
@@ -420,7 +419,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     private void performAllCouponsRequest(final AzureToken azureToken, final AzureUserInfo azureUserInfo, final UserCoupons userCoupons) {
-        showToast("Performing db fetch");
+        showToast("Performing remote db fetch");
         AvailableCouponsRequest request = new AvailableCouponsRequest(azureToken, azureUserInfo, Request.Method.POST, AzureUrls.COUPONS_METADATA, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -434,12 +433,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 for(int i = 0 ; i < cookies.size() ; i ++){
                     cookie[i] = new Cookie(cookies.get(i));
                 }
+
+                showToast("Saving httpCookies");
                 mCookieViewModel.insert(cookie);
+                showToast("Saving coupons");
                 mCouponViewModel.insert(couponsArray);
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
 
                 Log.d(TAG, "Starting activity");
-                //startActivity(intent);
+                startActivity(intent);
             }
         }, volleyErrorListener);
         queue.add(request);
