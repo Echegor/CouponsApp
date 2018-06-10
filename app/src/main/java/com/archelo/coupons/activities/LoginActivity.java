@@ -460,7 +460,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                 Toast toast = showToast("Done!");
                 Log.d(TAG, "Starting activity");
-
+                showProgress(false);
                 startActivity(intent);
                 toast.cancel();
             }

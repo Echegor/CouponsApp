@@ -170,6 +170,9 @@ public class MainActivity extends AppCompatActivity {
                             coupon.setClipped(true);
                             mCouponViewModel.update(coupon);
                         }
+                        else{
+                            showToast("Failed to clip " + coupon.getShort_description());
+                        }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
