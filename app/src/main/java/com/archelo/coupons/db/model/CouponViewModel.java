@@ -23,9 +23,13 @@ public class CouponViewModel extends AndroidViewModel {
 
     public LiveData<List<Coupon>> getAllCoupons() { return mAllCoupons; }
 
-    public void insert(Coupon word) { mRepository.insert(word); }
+    public void insert(Coupon coupon) { mRepository.insert(coupon); }
 
     public void insert(Coupon[] couponsArray) {
         mRepository.insert(couponsArray);
+    }
+
+    public void update(Coupon coupon) {
+        mRepository.update(coupon);
     }
 }

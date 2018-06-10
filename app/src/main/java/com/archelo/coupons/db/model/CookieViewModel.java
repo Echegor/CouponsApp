@@ -5,9 +5,7 @@ import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 
 import com.archelo.coupons.db.data.Cookie;
-import com.archelo.coupons.db.data.Coupon;
 import com.archelo.coupons.db.repo.CookieRepository;
-import com.archelo.coupons.db.repo.CouponRepository;
 
 import java.util.List;
 
@@ -25,7 +23,7 @@ public class CookieViewModel extends AndroidViewModel {
 
     public LiveData<List<Cookie>> getAllCookies() { return mAllCookies; }
 
-    public void insert(Cookie word) { mRepository.insert(word); }
+    public void insert(Cookie cookie) { mRepository.insert(cookie); }
 
     public void insert(Cookie[] CookiesArray) {
         mRepository.insert(CookiesArray);

@@ -1,6 +1,5 @@
 package com.archelo.coupons.activities;
 
-import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
@@ -10,44 +9,47 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.Volley;
 import com.archelo.coupons.db.data.AzureToken;
 import com.archelo.coupons.db.data.AzureUserInfo;
 import com.archelo.coupons.db.data.Cookie;
 import com.archelo.coupons.db.data.Coupon;
-import com.archelo.coupons.db.data.UserCoupons;
+import com.archelo.coupons.db.model.AzureTokenViewModel;
+import com.archelo.coupons.db.model.AzureUserInfoViewModel;
 import com.archelo.coupons.db.model.CookieViewModel;
 import com.archelo.coupons.db.model.CouponViewModel;
 import com.archelo.coupons.recycler.CouponListAdapter;
 import com.archelo.coupons.urls.AzureUrls;
-import com.archelo.coupons.volley.AvailableCouponsRequest;
+import com.archelo.coupons.volley.AddCouponRequest;
 import com.archelo.coupons.volley.VolleyUtils;
 import com.example.rtl1e.shopritecoupons.R;
+
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.CookieStore;
-import java.util.Arrays;
 import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private Toast lastToast;
-    private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
+    private CouponListAdapter mAdapter ;
     private CookieManager cookieManager = new CookieManager();
     private AzureToken azureToken;
     private AzureUserInfo azureUserInfo;
-    private UserCoupons userCoupons;
-    private Coupon[] couponsArray;
 
     private RequestQueue queue;
     private Response.ErrorListener volleyErrorListener = new Response.ErrorListener() {
@@ -59,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
     };
     private CouponViewModel mCouponViewModel;
     private CookieViewModel mCookieViewModel;
+    private AzureTokenViewModel mAzureTokenViewModel;
+    private AzureUserInfoViewModel mAzureUserInfoModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,17 +74,41 @@ public class MainActivity extends AppCompatActivity {
 
 
         RecyclerView recyclerView = findViewById(R.id.recyclerview);
-        final CouponListAdapter adapter = new CouponListAdapter(this);
-        recyclerView.setAdapter(adapter);
+        mAdapter = new CouponListAdapter(this);
+        recyclerView.setAdapter(mAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        queue = Volley.newRequestQueue(this);
 
         mCouponViewModel = ViewModelProviders.of(this).get(CouponViewModel.class);
         mCookieViewModel = ViewModelProviders.of(this).get(CookieViewModel.class);
+        mAzureTokenViewModel = ViewModelProviders.of(this).get(AzureTokenViewModel.class);
+        mAzureUserInfoModel = ViewModelProviders.of(this).get(AzureUserInfoViewModel.class);
+
+        mAzureTokenViewModel.getAllAzureTokens().observe(this, new Observer<List<AzureToken>>() {
+            @Override
+            public void onChanged(@Nullable final List<AzureToken> azureTokens) {
+                if(azureTokens != null)
+                    azureToken = azureTokens.get(0);
+                else
+                    Log.d(TAG,"Azure tokens is empty");
+            }
+        });
+
+        mAzureUserInfoModel.getAllAzureUserInfos().observe(this, new Observer<List<AzureUserInfo>>() {
+            @Override
+            public void onChanged(@Nullable final List<AzureUserInfo> azureUserInfoList) {
+                if(azureUserInfoList != null)
+                    azureUserInfo = azureUserInfoList.get(0);
+                else
+                    Log.d(TAG,"azureUserInfo is empty");
+            }
+        });
+
         mCouponViewModel.getAllCoupons().observe(this, new Observer<List<Coupon>>() {
             @Override
             public void onChanged(@Nullable final List<Coupon> coupons) {
                 // Update the cached copy of the coupons in the adapter.
-                adapter.setCoupons(coupons);
+                mAdapter.setCoupons(coupons);
             }
         });
 
@@ -102,6 +130,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        Button button = findViewById(R.id.clip_all_button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                performAddCouponRequest();
+            }
+        });
+
+
 
 
     }
@@ -114,17 +151,34 @@ public class MainActivity extends AppCompatActivity {
         lastToast.show();
     }
 
-    private void performAddAllCouponsRequest(final AzureToken azureToken, final AzureUserInfo azureUserInfo, final UserCoupons userCoupons) {
+    private void performAddCouponRequest() {
         showToast("Performing add coupon request ");
-        AvailableCouponsRequest request = new AvailableCouponsRequest(azureToken, azureUserInfo, Request.Method.POST, AzureUrls.COUPONS_ADD, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                Log.d(TAG, "request response " + response);
-                Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
-                Log.d(TAG, Arrays.toString(couponsArray));
+        List<Coupon> coupons = mAdapter.getCoupons();
+        for(final Coupon coupon : coupons){
+            if(coupon.isClipped()){
+                continue;
             }
-        }, volleyErrorListener);
-        queue.add(request);
+            AddCouponRequest request = new AddCouponRequest(azureUserInfo, azureToken,coupon.getCoupon_id(), Request.Method.POST, AzureUrls.COUPONS_ADD, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    Log.d(TAG, "request response " + response);
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        boolean clipped = (Boolean) jsonObject.get("result");
+                        if(clipped){
+                            showToast("Clipped " + coupon.getShort_description());
+                            coupon.setClipped(true);
+                            mCouponViewModel.update(coupon);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+
+                }
+            }, volleyErrorListener);
+            queue.add(request);
+        }
     }
 
 }

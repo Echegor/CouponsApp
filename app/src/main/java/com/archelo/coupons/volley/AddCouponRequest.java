@@ -14,21 +14,23 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AddCouponsRequest extends StringRequest {
-    public final String TAG = "AvailableCouponsRequest";
+public class AddCouponRequest extends StringRequest {
+    public final String TAG = "AddCouponRequest";
+    private final String coupon;
     private AzureToken azureToken;
     private AzureUserInfo azureUserInfo;
 
-    public AddCouponsRequest(AzureUserInfo azureUserInfo, int method, String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
+    public AddCouponRequest(AzureUserInfo azureUserInfo,AzureToken azureToken, String coupon, int method, String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
         super(method, url, listener, errorListener);
         this.azureToken = azureToken;
         this.azureUserInfo = azureUserInfo;
+        this.coupon = coupon;
     }
 
     @Override
     protected Response<String> parseNetworkResponse(NetworkResponse response) {
-        List<Header> headers = response.allHeaders;
-        Log.d(TAG, "Headers: \n" + headers.toString().replaceAll("],", ",\r\n"));
+        //List<Header> headers = response.allHeaders;
+        //Log.d(TAG, "Headers: \n" + headers.toString().replaceAll("],", ",\r\n"));
         return super.parseNetworkResponse(response);
     }
 
@@ -62,6 +64,8 @@ public class AddCouponsRequest extends StringRequest {
     @Override
     protected Map<String, String> getParams() {
         Map<String, String> params = new LinkedHashMap<>();
+        params.put("clip_source", "Web_SR");
+        params.put("coupon_id", coupon);
         params.put("ppc_number", azureUserInfo.getUserInfo().getFSN());
         return params;
     }

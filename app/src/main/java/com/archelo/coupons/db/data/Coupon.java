@@ -12,9 +12,9 @@ import android.support.annotation.NonNull;
 @Entity(tableName = "coupon_table")
 public class Coupon {
 
+    private String id;
     @PrimaryKey
     @NonNull
-    private String id;
     private String coupon_id;
     private String featured;
     private String requirement_description;
@@ -43,12 +43,14 @@ public class Coupon {
     private String long_description_header;
     private boolean clipped;
 
-    @NonNull
+    public Coupon(){}
+
+
     public String getId() {
         return id;
     }
 
-    public void setId(@NonNull String id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -60,11 +62,12 @@ public class Coupon {
         this.clipped = clipped;
     }
 
+    @NonNull
     public String getCoupon_id() {
         return coupon_id;
     }
 
-    public void setCoupon_id(String coupon_id) {
+    public void setCoupon_id(@NonNull String coupon_id) {
         this.coupon_id = coupon_id;
     }
 

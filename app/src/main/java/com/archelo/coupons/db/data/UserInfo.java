@@ -21,6 +21,18 @@ public class UserInfo {
         this.sessId = sessId;
     }
 
+    public UserInfo(String userInfo){
+        String [] info = userInfo.split("%delim%");
+        Email = info[0].split("=")[1];
+        FSN = info[1].split("=")[1];
+        FirstName = info[2].split("=")[1];
+        LastName = info[3].split("=")[1];
+        AccountId = info[4].split("=")[1];
+        StoreId = info[5].split("=")[1];
+        ReturnUrl = info[6].split("=")[1];
+        this.sessId = info[7].split("=")[1];
+    }
+
     public String getEmail() {
         return Email;
     }
@@ -55,15 +67,13 @@ public class UserInfo {
 
     @Override
     public String toString() {
-        return "UserInfo{" +
-                "Email='" + Email + '\'' +
-                ", FSN='" + FSN + '\'' +
-                ", FirstName='" + FirstName + '\'' +
-                ", LastName='" + LastName + '\'' +
-                ", AccountId='" + AccountId + '\'' +
-                ", StoreId='" + StoreId + '\'' +
-                ", ReturnUrl='" + ReturnUrl + '\'' +
-                ", sessId='" + sessId + '\'' +
-                '}';
+        return "Email=" + Email  +
+                "%delim%FSN=" + FSN  +
+                "%delim%FirstName=" + FirstName  +
+                "%delim%LastName=" + LastName  +
+                "%delim%AccountId=" + AccountId  +
+                "%delim%StoreId=" + StoreId  +
+                "%delim%ReturnUrl=" + ReturnUrl  +
+                "%delim%sessId=" + sessId ;
     }
 }

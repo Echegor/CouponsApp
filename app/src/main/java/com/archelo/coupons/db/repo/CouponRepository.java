@@ -34,6 +34,10 @@ public class CouponRepository {
         new insertArrayAsyncTask(mCouponDao).execute(couponsArray);
     }
 
+    public void update(Coupon coupon) {
+        new updateAsyncTask(mCouponDao).execute(coupon);
+    }
+
     private static class insertAsyncTask extends AsyncTask<Coupon, Void, Void> {
 
         private CouponDao mAsyncTaskDao;
@@ -47,6 +51,24 @@ public class CouponRepository {
             mAsyncTaskDao.insert(params[0]);
             return null;
         }
+    }
+
+    private static class updateAsyncTask extends AsyncTask<Coupon, Void, Void> {
+
+        private CouponDao mAsyncTaskDao;
+
+        updateAsyncTask(CouponDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+
+        @Override
+        protected Void doInBackground(final Coupon... params) {
+            mAsyncTaskDao.update(params[0]);
+            return null;
+        }
+
+
     }
 
     private static class insertArrayAsyncTask extends AsyncTask<Coupon, Void, Void> {

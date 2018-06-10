@@ -13,6 +13,8 @@ public class AzureUserInfo {
     private String Message;
     private UserInfo UserInfo;
 
+    public AzureUserInfo(){}
+
     public AzureUserInfo(String SSOUrl, String active, String message, UserInfo userInfo) {
         this.SSOUrl = SSOUrl;
         Active = active;
@@ -20,20 +22,44 @@ public class AzureUserInfo {
         UserInfo = userInfo;
     }
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     public String getSSOUrl() {
         return SSOUrl;
+    }
+
+    public void setSSOUrl(String SSOUrl) {
+        this.SSOUrl = SSOUrl;
     }
 
     public String getActive() {
         return Active;
     }
 
+    public void setActive(String active) {
+        Active = active;
+    }
+
     public String getMessage() {
         return Message;
     }
 
+    public void setMessage(String message) {
+        Message = message;
+    }
+
     public UserInfo getUserInfo() {
         return UserInfo;
+    }
+
+    public void setUserInfo(UserInfo userInfo) {
+        UserInfo = userInfo;
     }
 
     @Override

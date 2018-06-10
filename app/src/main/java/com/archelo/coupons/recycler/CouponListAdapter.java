@@ -52,6 +52,10 @@ public class CouponListAdapter extends RecyclerView.Adapter<CouponListAdapter.Co
         notifyDataSetChanged();
     }
 
+    public List<Coupon> getCoupons(){
+        return mCoupons;
+    }
+
     // getItemCount() is called many times, and when it is first called,
     // mCoupons has not been updated (means initially, it's null, and we can't return null).
     @Override

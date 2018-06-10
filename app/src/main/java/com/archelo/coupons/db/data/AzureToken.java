@@ -10,11 +10,12 @@ public class AzureToken {
     private Integer id;
     public final static String AUTHORIZATION = "Authorization";
     public final static String ZUMO_APPLICATION_TOKEN = "\"X-ZUMO-APPLICATION\":\"";
-    private final String authorization;
-    private final String userID;
-    private final String zumoApplicationToken;
-    private final boolean isSignedIn;
+    private String authorization;
+    private String userID;
+    private String zumoApplicationToken;
+    private boolean isSignedIn;
 
+    public AzureToken(){}
     private AzureToken(AzureTokenBuilder builder) {
         this.authorization = builder.authorization;
         this.userID = builder.userID;
@@ -22,16 +23,44 @@ public class AzureToken {
         this.isSignedIn = builder.isSignedIn;
     }
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     public String getAuthorization() {
         return authorization;
+    }
+
+    public void setAuthorization(String authorization) {
+        this.authorization = authorization;
     }
 
     public String getUserID() {
         return userID;
     }
 
+    public void setUserID(String userID) {
+        this.userID = userID;
+    }
+
     public String getZumoApplicationToken() {
         return zumoApplicationToken;
+    }
+
+    public void setZumoApplicationToken(String zumoApplicationToken) {
+        this.zumoApplicationToken = zumoApplicationToken;
+    }
+
+    public boolean isSignedIn() {
+        return isSignedIn;
+    }
+
+    public void setSignedIn(boolean signedIn) {
+        isSignedIn = signedIn;
     }
 
     public String toString() {

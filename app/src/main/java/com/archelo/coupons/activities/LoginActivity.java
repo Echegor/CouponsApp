@@ -41,6 +41,8 @@ import com.archelo.coupons.db.data.Cookie;
 import com.archelo.coupons.db.data.Coupon;
 import com.archelo.coupons.db.data.LoginStatus;
 import com.archelo.coupons.db.data.UserCoupons;
+import com.archelo.coupons.db.model.AzureTokenViewModel;
+import com.archelo.coupons.db.model.AzureUserInfoViewModel;
 import com.archelo.coupons.db.model.CookieViewModel;
 import com.archelo.coupons.db.model.CouponViewModel;
 import com.archelo.coupons.urls.AzureUrls;
@@ -108,6 +110,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private CouponViewModel mCouponViewModel;
     private CookieViewModel mCookieViewModel;
+    private AzureTokenViewModel mAzureTokenViewModel;
+    private AzureUserInfoViewModel mAzureUserInfoModel;
 
 
     @Override
@@ -152,6 +156,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mCouponViewModel = ViewModelProviders.of(this).get(CouponViewModel.class);
         mCookieViewModel = ViewModelProviders.of(this).get(CookieViewModel.class);
+        mAzureTokenViewModel = ViewModelProviders.of(this).get(AzureTokenViewModel.class);
+        mAzureUserInfoModel = ViewModelProviders.of(this).get(AzureUserInfoViewModel.class);
+        mAzureTokenViewModel.deleteAll();
+        mAzureUserInfoModel.deleteAll();
         mCookieViewModel.deleteAll();
     }
 
@@ -440,9 +448,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     cookie[i] = new Cookie(cookies.get(i));
                 }
 
-                showToast("Saving httpCookies");
+                mAzureTokenViewModel.insert(azureToken);
+                mAzureUserInfoModel.insert(azureUserInfo);
+                showToast("Saving " +cookie.length+" httpCookies ");
+                Log.d(TAG,"Saving " +cookie.length+" httpCookies ");
                 mCookieViewModel.insert(cookie);
-                showToast("Saving coupons");
+                showToast("Saving " +couponsArray.length+" coupons");
+                Log.d(TAG,"Saving " +couponsArray.length+" coupons");
                 mCouponViewModel.insert(couponsArray);
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
 

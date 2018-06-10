@@ -5,26 +5,22 @@ import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
-import android.arch.persistence.room.Update;
 
-import com.archelo.coupons.db.data.Coupon;
+import com.archelo.coupons.db.data.AzureToken;
 
 import java.util.List;
 
 @Dao
-public interface CouponDao {
+public interface AzureTokenDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insert(Coupon coupon);
+    void insert(AzureToken AzureToken);
 
-    @Query("DELETE FROM coupon_table")
+    @Query("DELETE FROM azure_token_table")
     void deleteAll();
 
-    @Query("SELECT * from coupon_table ORDER BY clipped ASC")
-    LiveData<List<Coupon>> getAllCoupons();
+    @Query("SELECT * from azure_token_table ORDER BY id ASC")
+    LiveData<List<AzureToken>> getAllAzureTokens();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insert(Coupon[] params);
-
-    @Update()
-    void update(Coupon param);
+    void insert(AzureToken[] params);
 }
