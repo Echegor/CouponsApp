@@ -40,7 +40,14 @@ public class CouponListAdapter extends RecyclerView.Adapter<CouponListAdapter.Co
     public void onBindViewHolder(@NonNull CouponViewHolder holder, int position) {
         if (mCoupons != null) {
             Coupon current = mCoupons.get(position);
-            holder.wordItemView.setText( current.isClipped() +" "+ current.getShort_description());
+            if(current.isClipped()){
+                holder.wordItemView.setBackgroundColor(holder.itemView.getResources().getColor(android.R.color.holo_green_light));
+            }
+            else{
+                holder.wordItemView.setBackgroundColor(holder.itemView.getResources().getColor(android.R.color.holo_red_light));
+            }
+
+            holder.wordItemView.setText( current.getShort_description());
         } else {
             // Covers the case of data not being ready yet.
             holder.wordItemView.setText("No Coupon");
