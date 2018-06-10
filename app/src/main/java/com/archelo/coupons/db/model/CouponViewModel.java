@@ -14,14 +14,32 @@ public class CouponViewModel extends AndroidViewModel {
     private CouponRepository mRepository;
 
     private LiveData<List<Coupon>> mAllCoupons;
+    private LiveData<List<Coupon>> mAllUnclippedAvailable;
+    private LiveData<List<Coupon>> mAllClipped;
+    private LiveData<List<Coupon>> mAllUnavailable;
 
     public CouponViewModel (Application application) {
         super(application);
         mRepository = new CouponRepository(application);
         mAllCoupons = mRepository.getAllCoupons();
+        mAllClipped = mRepository.getAllClipped();
+        mAllUnclippedAvailable = mRepository.getAllUnclippedAvaiable();
+        mAllUnavailable = mRepository.getAllUnavailable();
     }
 
     public LiveData<List<Coupon>> getAllCoupons() { return mAllCoupons; }
+
+    public LiveData<List<Coupon>> getAllUnclippedAvailable() {
+        return mAllUnclippedAvailable;
+    }
+
+    public LiveData<List<Coupon>> getAllClipped() {
+        return mAllClipped;
+    }
+
+    public LiveData<List<Coupon>> getAllUnavailable() {
+        return mAllUnavailable;
+    }
 
     public void insert(Coupon coupon) { mRepository.insert(coupon); }
 

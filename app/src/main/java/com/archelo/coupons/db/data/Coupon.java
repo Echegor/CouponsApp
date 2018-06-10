@@ -42,9 +42,17 @@ public class Coupon {
     private String expiration_date;
     private String long_description_header;
     private boolean clipped;
+    private boolean available;
 
     public Coupon(){}
 
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void setAvailable(boolean available) {
+        this.available = available;
+    }
 
     public String getId() {
         return id;

@@ -28,6 +28,9 @@
             android:name="com.archelo.coupons.activities.MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name="com.archelo.coupons.activities.CouponActivity"
+            android:label="@string/title_activity_coupon"></activity>
     </application>
 
 </manifest>

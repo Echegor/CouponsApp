@@ -435,11 +435,35 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             public void onResponse(String response) {
                 Log.d(TAG, "request response " + response);
                 Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
+
+                /*
+                * TODO replace this garbage with this
+                * InputStream stream = new ByteArrayInputStream(exampleString.getBytes(StandardCharsets.UTF_8));
+                *       JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
+                        List<Message> messages = new ArrayList<Message>();
+                        reader.beginArray();
+                        while (reader.hasNext()) {
+                            Message message = gson.fromJson(reader, Message.class);
+                            messages.add(message);
+                        }
+                        reader.endArray();
+                        reader.close();
+                        return messages;
+                * */
+
                 Coupon[] couponsArray = new Gson().fromJson(response, Coupon[].class);
                 Log.d(TAG, Arrays.toString(couponsArray));
 
                 for(Coupon coupon : couponsArray){
-                    coupon.setClipped(userCoupons.isClipped(coupon.getCoupon_id()));
+                    Boolean avail = userCoupons.isClipped(coupon.getCoupon_id());
+                    if(avail == null){
+                        coupon.setClipped(false);
+                        coupon.setAvailable(false);
+                    }
+                    else{
+                        coupon.setClipped(avail);
+                        coupon.setAvailable(true);
+                    }
                 }
 
                 List<HttpCookie> cookies = cookieManager.getCookieStore().getCookies();
@@ -456,7 +480,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 showToast("Saving " +couponsArray.length+" coupons");
                 Log.d(TAG,"Saving " +couponsArray.length+" coupons");
                 mCouponViewModel.insert(couponsArray);
-                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                Intent intent = new Intent(LoginActivity.this, CouponActivity.class);
 
                 Toast toast = showToast("Done!");
                 Log.d(TAG, "Starting activity");

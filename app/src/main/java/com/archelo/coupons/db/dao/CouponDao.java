@@ -22,8 +22,20 @@ public interface CouponDao {
     @Query("SELECT * from coupon_table ORDER BY clipped DESC")
     LiveData<List<Coupon>> getAllCoupons();
 
+    @Query("SELECT * from coupon_table WHERE clipped = 0 AND available = 1 ORDER BY clipped DESC")
+    LiveData<List<Coupon>> getAllUnclippedCoupons();
+
+    @Query("SELECT * from coupon_table WHERE clipped = 1 ORDER BY clipped DESC")
+    LiveData<List<Coupon>> getAllClippedCoupons();
+
+    @Query("SELECT * from coupon_table WHERE available = 0 ORDER BY clipped DESC")
+    LiveData<List<Coupon>> getAllUnavailableCoupons();
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(Coupon[] params);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insert(List<Coupon> params);
 
     @Update()
     void update(Coupon param);

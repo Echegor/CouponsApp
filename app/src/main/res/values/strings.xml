@@ -15,4 +15,8 @@
     </string>
     <string name="title_activity_main">MainActivity</string>
     <string name="clip_all">Clip All</string>
+    <string name="title_activity_coupon">CouponActivity</string>
+    <string name="title_home">Clipped</string>
+    <string name="title_dashboard">Unclipped</string>
+    <string name="title_notifications">Unavailable</string>
 </resources>

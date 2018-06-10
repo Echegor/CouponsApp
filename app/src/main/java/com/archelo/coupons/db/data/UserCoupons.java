@@ -47,12 +47,8 @@ public class UserCoupons {
         return sum;
     }
 
-    public boolean isClipped(String coupon_id){
-        Boolean bool = cache.get(coupon_id);
-        if(bool == null ){
-            return false;
-        }
-        return bool;
+    public Boolean isClipped(String coupon_id){
+        return cache.get(coupon_id);
     }
 
     @Override
