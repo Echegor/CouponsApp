@@ -4,6 +4,7 @@ import android.arch.lifecycle.Observer;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
@@ -31,6 +32,7 @@ public class CouponFragment extends Fragment {
     public static final int INACTIVE = 2;
     private static final String ARG_MODE = "ARG_MODE";
     private CouponListAdapter mAdapter ;
+    private List<Coupon> couponList;
 
 
     private String mText;
@@ -68,11 +70,20 @@ public class CouponFragment extends Fragment {
         }
 
         RecyclerView recyclerView = view.findViewById(R.id.recyclerview);
+        final CouponActivity couponActivity = (CouponActivity)getActivity();
+        FloatingActionButton fab = couponActivity.getFloatingActionButton();
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                couponActivity.performAddCouponRequest(couponList);
+            }
+        });
+
         mAdapter = new CouponListAdapter(getContext());
         recyclerView.setAdapter(mAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        CouponViewModel couponViewModel = ((CouponActivity)getActivity()).getmCouponViewModel();
+        CouponViewModel couponViewModel = couponActivity.getmCouponViewModel();
         switch (mMode){
             case ACTIVE:
                 couponViewModel.getAllClipped().observe(this, new Observer<List<Coupon>>() {
@@ -81,6 +92,7 @@ public class CouponFragment extends Fragment {
                         // Update the cached copy of the coupons in the adapter.
                         updateToolbarText("Available: " + (coupons == null ? 0 : coupons.size()));
                         mAdapter.setCoupons(coupons);
+                        couponList = coupons;
                     }
                 });
                 break;
@@ -91,6 +103,7 @@ public class CouponFragment extends Fragment {
                         // Update the cached copy of the coupons in the adapter.
                         updateToolbarText("Unavailable: " + (coupons == null ? 0 : coupons.size()));
                         mAdapter.setCoupons(coupons);
+                        couponList = coupons;
                     }
                 });
                 break;
@@ -101,6 +114,7 @@ public class CouponFragment extends Fragment {
                         // Update the cached copy of the coupons in the adapter.
                         updateToolbarText("Unclipped: " + (coupons == null ? 0 : coupons.size()));
                         mAdapter.setCoupons(coupons);
+                        couponList = coupons;
                     }
                 });
                 break;

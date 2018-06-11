@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -61,6 +62,7 @@ public class CouponActivity extends AppCompatActivity {
     private CookieViewModel mCookieViewModel;
     private AzureTokenViewModel mAzureTokenViewModel;
     private AzureUserInfoViewModel mAzureUserInfoModel;
+    private FloatingActionButton floatingActionButton;
 
     private static final String SELECTED_ITEM = "arg_selected_item";
 
@@ -82,6 +84,7 @@ public class CouponActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_coupon);
 
+        floatingActionButton = findViewById(R.id.clip_all_button);
         mTextMessage = (TextView) findViewById(R.id.message);
         mBottomNav = (BottomNavigationView) findViewById(R.id.navigation);
         mBottomNav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -138,6 +141,10 @@ public class CouponActivity extends AppCompatActivity {
                 Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
             }
         });
+    }
+
+    public FloatingActionButton getFloatingActionButton() {
+        return floatingActionButton;
     }
 
     public CouponViewModel getmCouponViewModel() {
@@ -211,7 +218,7 @@ public class CouponActivity extends AppCompatActivity {
         lastToast.show();
     }
 
-    private void performAddCouponRequest(List<Coupon> coupons) {
+    public void performAddCouponRequest(List<Coupon> coupons) {
         showToast("Performing add coupon request ");
         for(final Coupon coupon : coupons){
             if(coupon.isClipped()){
