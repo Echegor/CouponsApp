@@ -59,14 +59,19 @@ import com.archelo.coupons.volley.VerifySignInRequest;
 import com.archelo.coupons.volley.VolleyUtils;
 import com.example.rtl1e.shopritecoupons.R;
 import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.HttpCookie;
 import java.net.HttpURLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static android.Manifest.permission.READ_CONTACTS;
@@ -436,50 +441,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 Log.d(TAG, "request response " + response);
                 Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
 
-                /*
-                * TODO replace this garbage with this
-                * InputStream stream = new ByteArrayInputStream(exampleString.getBytes(StandardCharsets.UTF_8));
-                *       JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
-                        List<Message> messages = new ArrayList<Message>();
-                        reader.beginArray();
-                        while (reader.hasNext()) {
-                            Message message = gson.fromJson(reader, Message.class);
-                            messages.add(message);
-                        }
-                        reader.endArray();
-                        reader.close();
-                        return messages;
-                * */
-
-                Coupon[] couponsArray = new Gson().fromJson(response, Coupon[].class);
-                Log.d(TAG, Arrays.toString(couponsArray));
-
-                for(Coupon coupon : couponsArray){
-                    Boolean avail = userCoupons.isClipped(coupon.getCoupon_id());
-                    if(avail == null){
-                        coupon.setClipped(false);
-                        coupon.setAvailable(false);
-                    }
-                    else{
-                        coupon.setClipped(avail);
-                        coupon.setAvailable(true);
-                    }
-                }
-
-                List<HttpCookie> cookies = cookieManager.getCookieStore().getCookies();
-                Cookie[] cookie = new Cookie[cookies.size()];
-                for(int i = 0 ; i < cookies.size() ; i ++){
-                    cookie[i] = new Cookie(cookies.get(i));
-                }
-
+                storeResponseIntoDb(response, userCoupons);
+                storeCookiesIntoDb();
                 mAzureTokenViewModel.insert(azureToken);
                 mAzureUserInfoModel.insert(azureUserInfo);
-                showToast("Saving " +cookie.length+" httpCookies ");
-                Log.d(TAG,"Saving " +cookie.length+" httpCookies ");
-                mCookieViewModel.insert(cookie);
-                showToast("Saving " +couponsArray.length+" coupons");
-                Log.d(TAG,"Saving " +couponsArray.length+" coupons");
-                mCouponViewModel.insert(couponsArray);
+
                 Intent intent = new Intent(LoginActivity.this, CouponActivity.class);
 
                 Toast toast = showToast("Done!");
@@ -490,6 +456,72 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         }, volleyErrorListener);
         queue.add(request);
+    }
+
+    private void storeCookiesIntoDb() {
+        List<HttpCookie> cookies = cookieManager.getCookieStore().getCookies();
+        Cookie[] cookie = new Cookie[cookies.size()];
+        for(int i = 0 ; i < cookies.size() ; i ++){
+            cookie[i] = new Cookie(cookies.get(i));
+        }
+        showToast("Saving " +cookie.length+" httpCookies ");
+        Log.d(TAG,"Saving " +cookie.length+" httpCookies ");
+        mCookieViewModel.insert(cookie);
+    }
+
+    private void storeResponseIntoDb(String response, UserCoupons userCoupons) {
+        int count = 0;
+        Coupon[] couponCache = new Coupon[50];
+        Gson gson = new Gson();
+        InputStream inputStream = new ByteArrayInputStream(response.getBytes(StandardCharsets.UTF_8));
+        JsonReader reader = null;
+        try {
+            reader = new JsonReader(new InputStreamReader(inputStream, "UTF-8"));
+            reader.beginArray();
+            while (reader.hasNext()) {
+                Coupon coupon = gson.fromJson(reader, Coupon.class);
+                couponCache[count++] = coupon;
+
+                if(count == 50){
+                    updateCouponContents(couponCache,userCoupons);
+                    count = 0;
+                }
+
+            }
+            if(count > 0){
+                updateCouponContents(couponCache,userCoupons);
+            }
+
+            reader.endArray();
+            reader.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+//        Coupon[] couponsArray = new Gson().fromJson(response, Coupon[].class);
+//        Log.d(TAG, Arrays.toString(couponsArray));
+
+
+
+    }
+
+    private void updateCouponContents(Coupon[] couponsArray, UserCoupons userCoupons){
+        for(Coupon coupon : couponsArray){
+            Boolean avail = userCoupons.isClipped(coupon.getCoupon_id());
+            if(avail == null){
+                coupon.setClipped(false);
+                coupon.setAvailable(false);
+            }
+            else{
+                coupon.setClipped(avail);
+                coupon.setAvailable(true);
+            }
+        }
+
+        showToast("Saving " +couponsArray.length+" coupons");
+        Log.d(TAG,"Saving " +couponsArray.length+" coupons");
+        mCouponViewModel.insert(couponsArray);
     }
 
     private boolean isEmailValid(String email) {

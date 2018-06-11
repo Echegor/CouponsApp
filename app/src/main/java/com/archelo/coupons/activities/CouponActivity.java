@@ -104,7 +104,7 @@ public class CouponActivity extends AppCompatActivity {
         mAzureTokenViewModel.getAllAzureTokens().observe(this, new Observer<List<AzureToken>>() {
             @Override
             public void onChanged(@Nullable final List<AzureToken> azureTokens) {
-                if(azureTokens != null)
+                if(azureTokens != null && azureTokens.size() > 0)
                     azureToken = azureTokens.get(0);
                 else
                     Log.d(TAG,"Azure tokens is empty");
@@ -114,7 +114,7 @@ public class CouponActivity extends AppCompatActivity {
         mAzureUserInfoModel.getAllAzureUserInfos().observe(this, new Observer<List<AzureUserInfo>>() {
             @Override
             public void onChanged(@Nullable final List<AzureUserInfo> azureUserInfoList) {
-                if(azureUserInfoList != null)
+                if(azureUserInfoList != null && azureUserInfoList.size() > 0)
                     azureUserInfo = azureUserInfoList.get(0);
                 else
                     Log.d(TAG,"azureUserInfo is empty");
