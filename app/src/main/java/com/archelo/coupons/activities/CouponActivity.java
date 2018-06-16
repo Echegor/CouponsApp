@@ -192,12 +192,7 @@ public class CouponActivity extends AppCompatActivity {
         // update selected item
         mSelectedItem = item.getItemId();
 
-        // uncheck the other items.
-        for (int i = 0; i < mBottomNav.getMenu().size(); i++) {
-            MenuItem menuItem = mBottomNav.getMenu().getItem(i);
-            menuItem.setChecked(menuItem.getItemId() == item.getItemId());
-        }
-
+        item.setChecked(true);
 
         if (frag != null) {
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
