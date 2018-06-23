@@ -169,7 +169,7 @@ public class CouponActivity extends AppCompatActivity {
     }
 
     private boolean selectFragment(MenuItem item) {
-        Fragment frag = null;
+        Fragment frag;
         // init corresponding fragment
         switch (item.getItemId()) {
 

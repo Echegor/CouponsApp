@@ -72,6 +72,7 @@ import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static android.Manifest.permission.READ_CONTACTS;
@@ -166,6 +167,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mAzureTokenViewModel.deleteAll();
         mAzureUserInfoModel.deleteAll();
         mCookieViewModel.deleteAll();
+        mCouponViewModel.deleteAll();
     }
 
 
@@ -483,13 +485,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 couponCache[count++] = coupon;
 
                 if(count == 50){
-                    updateCouponContents(couponCache,userCoupons);
+                    Coupon[] temp = Arrays.copyOf(couponCache,count);
+                    updateCouponContents(temp,userCoupons);
                     count = 0;
                 }
 
             }
             if(count > 0){
-                updateCouponContents(couponCache,userCoupons);
+                Coupon[] temp = Arrays.copyOf(couponCache,count);
+                updateCouponContents(temp,userCoupons);
             }
 
             reader.endArray();

@@ -50,4 +50,8 @@ public class CouponViewModel extends AndroidViewModel {
     public void update(Coupon coupon) {
         mRepository.update(coupon);
     }
+
+    public void deleteAll() {
+        mRepository.deleteAll();
+    }
 }
