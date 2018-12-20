@@ -29,7 +29,7 @@ public class GetSharedHeadersRequest extends StringRequest {
     @Override
     protected Response<String> parseNetworkResponse(NetworkResponse response) {
         List<Header> headers =  response.allHeaders;
-        Log.d(TAG,"Headers: \n" +headers.toString().replaceAll("],",",\r\n"));
+//        Log.d(TAG,"Headers: \n" +headers.toString().replaceAll("],",",\r\n"));
         //cookieStore.parseHeaders(headers,getUrl());
         return super.parseNetworkResponse(response);
     }

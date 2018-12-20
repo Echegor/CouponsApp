@@ -29,7 +29,7 @@ public class SignInRequest extends StringRequest {
     @Override
     protected Response<String> parseNetworkResponse(NetworkResponse response) {
         List<Header> headers = response.allHeaders;
-        Log.d(TAG, "Response code " + response.statusCode + " Headers: \n" + headers.toString().replaceAll("],", ",\r\n"));
+//        Log.d(TAG, "Response code " + response.statusCode + " Headers: \n" + headers.toString().replaceAll("],", ",\r\n"));
         return super.parseNetworkResponse(response);
     }
 

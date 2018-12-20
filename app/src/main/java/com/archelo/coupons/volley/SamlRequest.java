@@ -37,7 +37,7 @@ public class SamlRequest extends StringRequest {
     @Override
     protected Response<String> parseNetworkResponse(NetworkResponse response) {
         List<Header> headers =  response.allHeaders;
-        Log.d(TAG,"Headers: \n" +headers.toString().replaceAll("],",",\r\n"));
+//        Log.d(TAG,"Headers: \n" +headers.toString().replaceAll("],",",\r\n"));
         return super.parseNetworkResponse(response);
     }
 
@@ -47,7 +47,9 @@ public class SamlRequest extends StringRequest {
         Map<String,String> samlQueryParams = new LinkedHashMap<>();
 //        samlQueryParams.put("sessId", loginStatus.getUserId());
 //        samlQueryParams.put("returnUrl", "http://coupons.shoprite.com/");
-        return super.getUrl() + VolleyUtils.toURLEncodedString(samlQueryParams,false);
+        String url = super.getUrl() + VolleyUtils.toURLEncodedString(samlQueryParams,false);
+        Log.d(TAG,url);
+        return url;
     }
 
     @Override
@@ -60,7 +62,7 @@ public class SamlRequest extends StringRequest {
         headers.put("Upgrade-Insecure-Requests", "1");
         headers.put("Host", "scheaders.shoprite.com");
         headers.put("Referer", "http://coupons.shoprite.com/");
-        Log.d(TAG, "Request Headers: \n" + VolleyUtils.formatHeaders(headers));
+//        Log.d(TAG, "Request Headers: \n" + VolleyUtils.formatHeaders(headers));
         return headers;
     }
 

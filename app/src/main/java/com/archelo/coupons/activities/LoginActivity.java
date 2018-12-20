@@ -83,6 +83,9 @@ import static android.Manifest.permission.READ_CONTACTS;
 
 /**
  * A login screen that offers login via email/password.
+ *
+ * Note because you will forget. Volley does not handle cookies properly. That is why it is switched to cookie manager.
+ * A map of headers log you have placed will not log all set-cookie request as it is stored in a map and erased.
  */
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
@@ -280,19 +283,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private void performLogin(final String email, final String password) {
         showToast("Performing GetsharedHeaderRequest");
-//        StatusRequest statusRequest = new StatusRequest(Request.Method.GET, ShopriteURLS.STATUS, new Response.Listener<String>() {
-//            @Override
-//            public void onResponse(String response) {
-//                Log.d(TAG, "StatusRequest response " + response);
-//                Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
-//                LoginStatus loginStatus = new Gson().fromJson(response, LoginStatus.class);
-//                performSamlRequest(loginStatus, email, password);
-//            }
-//        }, volleyErrorListener);
         GetSharedHeadersRequest getSharedHeadersRequest = new GetSharedHeadersRequest(new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
+                Log.d(TAG, "CookieManagerCookies GetSharedHeadersRequest: " + VolleyUtils.logCookies(cookieManager));
                 List<HttpCookie> cookies = cookieManager.getCookieStore().getCookies();
                 for (HttpCookie i : cookies) {
                     if (i.getName().equals("MWG_GSA_S")) {
@@ -312,8 +306,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         final SamlRequest samlRequest = new SamlRequest(mwg_gsa_s, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "SamlRequest response " + response);
-                Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
+                Log.d(TAG, "SamlRequest " + response);
+                Log.d(TAG, "CookieManagerCookies SamlRequest: " + VolleyUtils.logCookies(cookieManager));
                 performAuthenticate3601Request(response, mwg_gsa_s, email, password);
             }
         }, volleyErrorListener);
@@ -328,7 +322,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             @Override
             public void onResponse(String response) {
                 //Log.d(TAG, "Authenticate3601Request response " + response);
-                Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
+                Log.d(TAG, "CookieManagerCookies Authenticate3601Request: " + VolleyUtils.logCookies(cookieManager));
                 performAuthenticateRequest(response, email, password);
             }
         }, volleyErrorListener);
@@ -341,7 +335,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             @Override
             public void onResponse(String response) {
                 //Log.d(TAG, "AuthenticateRequest response " + response);
-                Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
+                Log.d(TAG, "CookieManagerCookies AuthenticateRequest: " + VolleyUtils.logCookies(cookieManager));
                 performSignInRequest();
             }
         }, volleyErrorListener);
@@ -354,8 +348,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         SignInRequest samlResponse = new SignInRequest(new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "SamlResponse response " + response);
-                Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
+                //Log.d(TAG, "SamlResponse response " + response);
+                Log.d(TAG, "CookieManagerCookies SignInRequest: " + VolleyUtils.logCookies(cookieManager));
                 performSamlResponseRequest();
             }
         }, volleyErrorListener);
@@ -369,7 +363,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             @Override
             public void onResponse(String response) {
                 Log.d(TAG, "SamlResponse response " + response);
-                Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
+                Log.d(TAG, "CookieManagerCookies SamlResponse: " + VolleyUtils.logCookies(cookieManager));
                 //performSignInVerifyRequest(loginStatus, response);
             }
         }, volleyErrorListener);

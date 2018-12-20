@@ -35,7 +35,7 @@ public class Authenticate3601Request extends StringRequest {
     @Override
     protected Response<String> parseNetworkResponse(NetworkResponse response) {
         List<Header> headers = response.allHeaders;
-        Log.d(TAG, "Response code " + response.statusCode +" Headers: \n" + headers.toString().replaceAll("],", ",\r\n"));
+//        Log.d(TAG, "Response code " + response.statusCode +" Headers: \n" + headers.toString().replaceAll("],", ",\r\n"));
         return super.parseNetworkResponse(response);
     }
 
@@ -49,10 +49,11 @@ public class Authenticate3601Request extends StringRequest {
     @Override
     public String getUrl() {
         Map<String, String> params = new LinkedHashMap<>();
-        params.put("binding", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST&&forceChallenge=1");
-        params.put("cancelUri", "https://scheaders.shoprite.com/store/ShopRite/User/ReturnFromSignIn?success=False&store=ShopRite&addressId=0");
-        String url = super.getUrl() + VolleyUtils.toURLEncodedString(params, true);
-        Log.d(TAG, "GETURL: " + url);
+        params.put("binding", "urn%3aoasis%3anames%3atc%3aSAML%3a2.0%3abindings%3aHTTP-POST&");
+        params.put("forceChallenge","1");
+        params.put("cancelUri", "https%3a%2f%2fscheaders.shoprite.com%2fstore%2fShopRite%2fUser%2fReturnFromSignIn%3fsuccess%3dFalse%26store%3dShopRite%26addressId%3d0");
+        String url = super.getUrl() + VolleyUtils.toURLEncodedString(params, false);
+//        Log.d(TAG, "GETURL: " + url);
         return url;
     }
 
@@ -68,7 +69,7 @@ public class Authenticate3601Request extends StringRequest {
         headers.put("Upgrade-Insecure-Requests", "1");
         headers.put("Origin","https://scheaders.shoprite.com");
         headers.put("Referer", "https://scheaders.shoprite.com/store/"+VolleyUtils.toEncodedString(mwg_gsa_s.getPseudoStoreId())+"/User/SignIn");
-        Log.d(TAG, "Request Headers: \n" + VolleyUtils.formatHeaders(headers));
+//        Log.d(TAG, "Request Headers: \n" + VolleyUtils.formatHeaders(headers));
         return headers;
     }
 

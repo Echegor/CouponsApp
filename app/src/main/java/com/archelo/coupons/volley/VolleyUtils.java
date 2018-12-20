@@ -157,6 +157,7 @@ public class VolleyUtils {
         for(HttpCookie cookie : cookies){
             builder.append(cookie).append(System.lineSeparator());
         }
+        builder.append("\r\n");
         return builder.toString();
     }
 
