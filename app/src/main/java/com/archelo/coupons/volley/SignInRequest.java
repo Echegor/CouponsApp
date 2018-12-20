@@ -15,11 +15,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SamlResponse extends StringRequest {
-    public final String TAG = "SamlResponse";
+public class SignInRequest extends StringRequest {
+    public final String TAG = "SignInRequest";
 
-    public SamlResponse(Response.Listener<String> listener, Response.ErrorListener errorListener) {
-        super(Request.Method.GET, ShopriteURLS.DONE_EDITING, listener, errorListener);
+    public SignInRequest(Response.Listener<String> listener, Response.ErrorListener errorListener) {
+        super(Request.Method.GET, ShopriteURLS.SIGN_IN, listener, errorListener);
     }
 
     /*
@@ -50,7 +50,7 @@ public class SamlResponse extends StringRequest {
         headers.put("Upgrade-Insecure-Requests", "1");
         headers.put("Host", "secure.shoprite.com");
 //        headers.put("Origin", "https://secure.shoprite.com");
-        headers.put("Referer", "https://secure.shoprite.com/User/SignIn/3601");
+//        headers.put("Referer", "https://secure.shoprite.com/User/SignIn/3601");
         //Log.d(TAG,"getHeaders " + headers);
         return headers;
     }

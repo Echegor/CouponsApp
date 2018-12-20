@@ -1,0 +1,381 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "5272c2f4850af629f86c3fdbbb3105f5",
+    "entities": [
+      {
+        "tableName": "coupon_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT, `coupon_id` TEXT NOT NULL, `featured` TEXT, `requirement_description` TEXT, `brand_name` TEXT, `reward_upcs` TEXT, `short_description` TEXT, `image_url` TEXT, `value` TEXT, `total_downloads` TEXT, `targeting_buckets` TEXT, `targeted_offer` TEXT, `tags` TEXT, `enabled` TEXT, `external_id` TEXT, `pos_live_date` TEXT, `display_start_date` TEXT, `display_end_date` TEXT, `offer_type` TEXT, `Category` TEXT, `publication_id` TEXT, `long_description` TEXT, `requirement_upcs` TEXT, `subcategory` TEXT, `offer_priority` TEXT, `expiration_date` TEXT, `long_description_header` TEXT, `clipped` INTEGER NOT NULL, `available` INTEGER NOT NULL, PRIMARY KEY(`coupon_id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "coupon_id",
+            "columnName": "coupon_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "featured",
+            "columnName": "featured",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "requirement_description",
+            "columnName": "requirement_description",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "brand_name",
+            "columnName": "brand_name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "reward_upcs",
+            "columnName": "reward_upcs",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "short_description",
+            "columnName": "short_description",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "image_url",
+            "columnName": "image_url",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "value",
+            "columnName": "value",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "total_downloads",
+            "columnName": "total_downloads",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "targeting_buckets",
+            "columnName": "targeting_buckets",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "targeted_offer",
+            "columnName": "targeted_offer",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "tags",
+            "columnName": "tags",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "enabled",
+            "columnName": "enabled",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "external_id",
+            "columnName": "external_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "pos_live_date",
+            "columnName": "pos_live_date",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "display_start_date",
+            "columnName": "display_start_date",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "display_end_date",
+            "columnName": "display_end_date",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "offer_type",
+            "columnName": "offer_type",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "Category",
+            "columnName": "Category",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "publication_id",
+            "columnName": "publication_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "long_description",
+            "columnName": "long_description",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "requirement_upcs",
+            "columnName": "requirement_upcs",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "subcategory",
+            "columnName": "subcategory",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "offer_priority",
+            "columnName": "offer_priority",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "expiration_date",
+            "columnName": "expiration_date",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "long_description_header",
+            "columnName": "long_description_header",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "clipped",
+            "columnName": "clipped",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "available",
+            "columnName": "available",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "coupon_id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "cookie_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `comment` TEXT, `commentURL` TEXT, `discard` INTEGER NOT NULL, `portlist` TEXT, `domain` TEXT, `maxAge` INTEGER NOT NULL, `path` TEXT, `secure` INTEGER NOT NULL, `name` TEXT, `value` TEXT, `version` INTEGER NOT NULL, `date` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "comment",
+            "columnName": "comment",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "commentURL",
+            "columnName": "commentURL",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "discard",
+            "columnName": "discard",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "portlist",
+            "columnName": "portlist",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "domain",
+            "columnName": "domain",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "maxAge",
+            "columnName": "maxAge",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "path",
+            "columnName": "path",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "secure",
+            "columnName": "secure",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "value",
+            "columnName": "value",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "version",
+            "columnName": "version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "azure_user_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `SSOUrl` TEXT, `Active` TEXT, `Message` TEXT, `UserInfo` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "SSOUrl",
+            "columnName": "SSOUrl",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "Active",
+            "columnName": "Active",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "Message",
+            "columnName": "Message",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "UserInfo",
+            "columnName": "UserInfo",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "azure_token_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `authorization` TEXT, `userID` TEXT, `zumoApplicationToken` TEXT, `isSignedIn` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "authorization",
+            "columnName": "authorization",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "userID",
+            "columnName": "userID",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "zumoApplicationToken",
+            "columnName": "zumoApplicationToken",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "isSignedIn",
+            "columnName": "isSignedIn",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"5272c2f4850af629f86c3fdbbb3105f5\")"
+    ]
+  }
+}

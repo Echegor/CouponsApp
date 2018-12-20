@@ -74,6 +74,16 @@ public class VolleyUtils {
             Log.v(TAG, string.substring(start, end));
         }
     }
+
+    protected static String toEncodedString(String unencoded){
+        try{
+            return URLEncoder.encode(unencoded, "UTF-8");
+        }
+        catch(UnsupportedEncodingException ex){
+            ex.printStackTrace();
+        }
+        return "";
+    }
     protected static String toURLEncodedString(Map<String,String> map, boolean encode) {
         if (map == null || map.isEmpty())
             return "";

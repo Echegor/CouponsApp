@@ -15,11 +15,17 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SamlResponse extends StringRequest {
-    public final String TAG = "SamlResponse";
+public class AuthenticateRequest extends StringRequest {
+    public final String TAG = "AuthenticateRequest";
+    private final String email;
+    private final String password;
+    private String request;
 
-    public SamlResponse(Response.Listener<String> listener, Response.ErrorListener errorListener) {
-        super(Request.Method.GET, ShopriteURLS.DONE_EDITING, listener, errorListener);
+    public AuthenticateRequest( String request,String email,String password, Response.Listener<String> listener, Response.ErrorListener errorListener) {
+        super(Method.POST, ShopriteURLS.AUTHENTICATE, listener, errorListener);
+        this.request = request;
+        this.email = email;
+        this.password = password;
     }
 
     /*
@@ -28,28 +34,28 @@ public class SamlResponse extends StringRequest {
      * */
     @Override
     protected Response<String> parseNetworkResponse(NetworkResponse response) {
-        List<Header> headers = response.allHeaders;
-        Log.d(TAG, "Response code " + response.statusCode + " Headers: \n" + headers.toString().replaceAll("],", ",\r\n"));
+        List<Header> headers =  response.allHeaders;
+        Log.d(TAG, "Response code " + response.statusCode +" Headers: \n" + headers.toString().replaceAll("],", ",\r\n"));
         return super.parseNetworkResponse(response);
     }
 
 
     @Override
     public String getUrl() {
-        Map<String, String> params = new LinkedHashMap<>();
-        return super.getUrl() + VolleyUtils.toURLEncodedString(params, true);
+        Map<String,String> params = new LinkedHashMap<>();
+        return super.getUrl() + VolleyUtils.toURLEncodedString(params,true);
     }
 
     @Override
     public Map<String, String> getHeaders() {
-        Map<String, String> headers = new HashMap<>();
+        Map<String,String> headers = new HashMap<>();
         headers.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,application/json, text/javascript,*/*;q=0.8");
         //headers.put("Accept-Encoding", "gzip, deflate, br"); //death
         headers.put("Accept-Language", "en-US,en;q=0.9");
         headers.put("Connection", "keep-alive");
         headers.put("Upgrade-Insecure-Requests", "1");
         headers.put("Host", "secure.shoprite.com");
-//        headers.put("Origin", "https://secure.shoprite.com");
+        headers.put("Origin", "https://secure.shoprite.com");
         headers.put("Referer", "https://secure.shoprite.com/User/SignIn/3601");
         //Log.d(TAG,"getHeaders " + headers);
         return headers;
@@ -57,8 +63,15 @@ public class SamlResponse extends StringRequest {
 
     @Override
     protected Map<String, String> getParams() {
-        Map<String, String> params = new LinkedHashMap<>();
-        Log.d(TAG, "Params " + params);
+        String token = VolleyUtils.getRequestVerificationToken(request);
+        Map<String,String> params = new LinkedHashMap<>();
+        params.put("__RequestVerificationToken", token);
+        params.put("Email", email);
+        params.put("Password", password);
+        params.put("StoreGroupId", "3601");
+        params.put("ReturnUrl", "");
+
+        Log.d(TAG,"Params " + params);
         return params;
     }
 

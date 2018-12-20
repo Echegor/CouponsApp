@@ -4,9 +4,12 @@ import android.util.Log;
 
 import com.android.volley.Header;
 import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.toolbox.StringRequest;
 import com.archelo.coupons.db.data.LoginStatus;
+import com.archelo.coupons.db.data.MWG_GSA_S;
+import com.archelo.coupons.urls.ShopriteURLS;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,14 +18,14 @@ import java.util.Map;
 
 public class Authenticate3601Request extends StringRequest {
     public final String TAG = "Authenticate3601Request";
-    private LoginStatus loginStatus;
+    private MWG_GSA_S mwg_gsa_s;
     private String request;
 
-    public Authenticate3601Request(LoginStatus loginStatus, String request, int method, String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
-        super(method, url, listener, errorListener);
+    public Authenticate3601Request(String samlRequest,MWG_GSA_S mwg_gsa_s, Response.Listener<String> listener, Response.ErrorListener errorListener) {
+        super(Request.Method.POST, ShopriteURLS.AUTHENTICATE3601, listener, errorListener);
         //this.cookieStore = cookieStore;
-        this.loginStatus = loginStatus;
-        this.request = request;
+        this.mwg_gsa_s = mwg_gsa_s;
+        this.request = samlRequest;
     }
 
     /*
@@ -36,12 +39,18 @@ public class Authenticate3601Request extends StringRequest {
         return super.parseNetworkResponse(response);
     }
 
+   // https://secure.shoprite.com/User/Authenticate/3601?
+    // binding=urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST&&forceChallenge=1
+    // cancelUri=https://scheaders.shoprite.com/store/ShopRite/User/ReturnFromSignIn?success=False&store=ShopRite&addressId=0
 
+    //https://secure.shoprite.com/User/Authenticate/3601?
+    // binding=urn%3aoasis%3anames%3atc%3aSAML%3a2.0%3abindings%3aHTTP-POST&&forceChallenge=1
+    // cancelUri=https%3a%2f%2fscheaders.shoprite.com%2fstore%2fShopRite%2fUser%2fReturnFromSignIn%3fsuccess%3dFalse%26store%3dShopRite%26addressId%3d0
     @Override
     public String getUrl() {
         Map<String, String> params = new LinkedHashMap<>();
-        params.put("binding", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST");
-        params.put("cancelUri", "https://wfsso.azurewebsites.net/SRSSO/CancelSignIn/store/027F776?success=False");
+        params.put("binding", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST&&forceChallenge=1");
+        params.put("cancelUri", "https://scheaders.shoprite.com/store/ShopRite/User/ReturnFromSignIn?success=False&store=ShopRite&addressId=0");
         String url = super.getUrl() + VolleyUtils.toURLEncodedString(params, true);
         Log.d(TAG, "GETURL: " + url);
         return url;
@@ -57,8 +66,8 @@ public class Authenticate3601Request extends StringRequest {
         //headers.put("Accept-Encoding", "gzip, deflate, br"); //death
         headers.put("Connection", "keep-alive");
         headers.put("Upgrade-Insecure-Requests", "1");
-
-        headers.put("Referer", "https://wfsso.azurewebsites.net/SRSSO/SignIn?sessId=" + loginStatus.getUserId() + "&returnUrl=http://coupons.shoprite.com/");
+        headers.put("Origin","https://scheaders.shoprite.com");
+        headers.put("Referer", "https://scheaders.shoprite.com/store/"+VolleyUtils.toEncodedString(mwg_gsa_s.getPseudoStoreId())+"/User/SignIn");
         Log.d(TAG, "Request Headers: \n" + VolleyUtils.formatHeaders(headers));
         return headers;
     }

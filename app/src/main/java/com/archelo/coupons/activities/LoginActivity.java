@@ -40,6 +40,7 @@ import com.archelo.coupons.db.data.AzureUserInfo;
 import com.archelo.coupons.db.data.Cookie;
 import com.archelo.coupons.db.data.Coupon;
 import com.archelo.coupons.db.data.LoginStatus;
+import com.archelo.coupons.db.data.MWG_GSA_S;
 import com.archelo.coupons.db.data.UserCoupons;
 import com.archelo.coupons.db.model.AzureTokenViewModel;
 import com.archelo.coupons.db.model.AzureUserInfoViewModel;
@@ -48,11 +49,14 @@ import com.archelo.coupons.db.model.CouponViewModel;
 import com.archelo.coupons.urls.AzureUrls;
 import com.archelo.coupons.urls.ShopriteURLS;
 import com.archelo.coupons.volley.Authenticate3601Request;
+import com.archelo.coupons.volley.AuthenticateRequest;
 import com.archelo.coupons.volley.AvailableCouponsRequest;
 import com.archelo.coupons.volley.AzureServicesJSRequest;
 import com.archelo.coupons.volley.AzureSessionRequest;
+import com.archelo.coupons.volley.GetSharedHeadersRequest;
 import com.archelo.coupons.volley.SamlRequest;
 import com.archelo.coupons.volley.SamlResponse;
+import com.archelo.coupons.volley.SignInRequest;
 import com.archelo.coupons.volley.StatusRequest;
 import com.archelo.coupons.volley.VerifySignInRedirectRequest;
 import com.archelo.coupons.volley.VerifySignInRequest;
@@ -275,28 +279,42 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     private void performLogin(final String email, final String password) {
-        showToast("Performing StatusRequest");
-        StatusRequest statusRequest = new StatusRequest(Request.Method.GET, ShopriteURLS.STATUS, new Response.Listener<String>() {
+        showToast("Performing GetsharedHeaderRequest");
+//        StatusRequest statusRequest = new StatusRequest(Request.Method.GET, ShopriteURLS.STATUS, new Response.Listener<String>() {
+//            @Override
+//            public void onResponse(String response) {
+//                Log.d(TAG, "StatusRequest response " + response);
+//                Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
+//                LoginStatus loginStatus = new Gson().fromJson(response, LoginStatus.class);
+//                performSamlRequest(loginStatus, email, password);
+//            }
+//        }, volleyErrorListener);
+        GetSharedHeadersRequest getSharedHeadersRequest = new GetSharedHeadersRequest(new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "StatusRequest response " + response);
                 Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
-                LoginStatus loginStatus = new Gson().fromJson(response, LoginStatus.class);
-                performSamlRequest(loginStatus, email, password);
+                List<HttpCookie> cookies = cookieManager.getCookieStore().getCookies();
+                for (HttpCookie i : cookies) {
+                    if (i.getName().equals("MWG_GSA_S")) {
+                        MWG_GSA_S mwg_gsa_s = new Gson().fromJson(i.getValue(), MWG_GSA_S.class);
+                        Log.d(TAG, "Parsed cookie: " + mwg_gsa_s);
+                        performSamlRequest(mwg_gsa_s, email, password);
+                    }
+                }
             }
         }, volleyErrorListener);
-        statusRequest.setShouldCache(false);
-        queue.add(statusRequest);
+        getSharedHeadersRequest.setShouldCache(false);
+        queue.add(getSharedHeadersRequest);
     }
 
-    private void performSamlRequest(final LoginStatus loginStatus, final String email, final String password) {
+    private void performSamlRequest(final MWG_GSA_S mwg_gsa_s, final String email, final String password) {
         showToast("Performing SamlRequest");
-        SamlRequest samlRequest = new SamlRequest(loginStatus, Request.Method.GET, AzureUrls.SIGN_IN, new Response.Listener<String>() {
+        final SamlRequest samlRequest = new SamlRequest(mwg_gsa_s, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 Log.d(TAG, "SamlRequest response " + response);
                 Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
-                performAuthenticate3601Request(loginStatus, response, email, password);
+                performAuthenticate3601Request(response, mwg_gsa_s, email, password);
             }
         }, volleyErrorListener);
 
@@ -304,27 +322,55 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         queue.add(samlRequest);
     }
 
-    private void performAuthenticate3601Request(final LoginStatus loginStatus, final String samlRequest, final String email, final String password) {
+    private void performAuthenticate3601Request(final String samlRequest, final MWG_GSA_S mwg_gsa_s, final String email, final String password) {
         showToast("Performing Authenticate3601Request");
-        Authenticate3601Request authenticate3601Request = new Authenticate3601Request(loginStatus, samlRequest, Request.Method.POST, ShopriteURLS.AUTHENTICATE3601, new Response.Listener<String>() {
+        Authenticate3601Request authenticate3601Request = new Authenticate3601Request(samlRequest, mwg_gsa_s, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Authenticate3601Request response " + response);
+                //Log.d(TAG, "Authenticate3601Request response " + response);
                 Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
-                performSamlResponseRequest(loginStatus, response, email, password);
+                performAuthenticateRequest(response, email, password);
             }
         }, volleyErrorListener);
         queue.add(authenticate3601Request);
     }
 
-    private void performSamlResponseRequest(final LoginStatus loginStatus, final String response, final String email, final String password) {
+    private void performAuthenticateRequest(final String response, final String email, final String password) {
+        showToast("Performing AuthenticateRequest");
+        AuthenticateRequest samlResponse = new AuthenticateRequest(response, email, password, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                //Log.d(TAG, "AuthenticateRequest response " + response);
+                Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
+                performSignInRequest();
+            }
+        }, volleyErrorListener);
+
+        queue.add(samlResponse);
+    }
+
+    private void performSignInRequest() {
         showToast("Performing SamlResponse");
-        SamlResponse samlResponse = new SamlResponse(loginStatus, response, email, password, Request.Method.POST, ShopriteURLS.AUTHENTICATE, new Response.Listener<String>() {
+        SignInRequest samlResponse = new SignInRequest(new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 Log.d(TAG, "SamlResponse response " + response);
                 Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
-                performSignInVerifyRequest(loginStatus, response);
+                performSamlResponseRequest();
+            }
+        }, volleyErrorListener);
+
+        queue.add(samlResponse);
+    }
+
+    private void performSamlResponseRequest() {
+        showToast("Performing SamlResponse");
+        SamlResponse samlResponse = new SamlResponse(new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, "SamlResponse response " + response);
+                Log.d(TAG, "CookieManagerCookies: " + VolleyUtils.logCookies(cookieManager));
+                //performSignInVerifyRequest(loginStatus, response);
             }
         }, volleyErrorListener);
 
@@ -463,11 +509,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private void storeCookiesIntoDb() {
         List<HttpCookie> cookies = cookieManager.getCookieStore().getCookies();
         Cookie[] cookie = new Cookie[cookies.size()];
-        for(int i = 0 ; i < cookies.size() ; i ++){
+        for (int i = 0; i < cookies.size(); i++) {
             cookie[i] = new Cookie(cookies.get(i));
         }
-        showToast("Saving " +cookie.length+" httpCookies ");
-        Log.d(TAG,"Saving " +cookie.length+" httpCookies ");
+        showToast("Saving " + cookie.length + " httpCookies ");
+        Log.d(TAG, "Saving " + cookie.length + " httpCookies ");
         mCookieViewModel.insert(cookie);
     }
 
@@ -484,16 +530,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 Coupon coupon = gson.fromJson(reader, Coupon.class);
                 couponCache[count++] = coupon;
 
-                if(count == 50){
-                    Coupon[] temp = Arrays.copyOf(couponCache,count);
-                    updateCouponContents(temp,userCoupons);
+                if (count == 50) {
+                    Coupon[] temp = Arrays.copyOf(couponCache, count);
+                    updateCouponContents(temp, userCoupons);
                     count = 0;
                 }
 
             }
-            if(count > 0){
-                Coupon[] temp = Arrays.copyOf(couponCache,count);
-                updateCouponContents(temp,userCoupons);
+            if (count > 0) {
+                Coupon[] temp = Arrays.copyOf(couponCache, count);
+                updateCouponContents(temp, userCoupons);
             }
 
             reader.endArray();
@@ -507,24 +553,22 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 //        Log.d(TAG, Arrays.toString(couponsArray));
 
 
-
     }
 
-    private void updateCouponContents(Coupon[] couponsArray, UserCoupons userCoupons){
-        for(Coupon coupon : couponsArray){
+    private void updateCouponContents(Coupon[] couponsArray, UserCoupons userCoupons) {
+        for (Coupon coupon : couponsArray) {
             Boolean avail = userCoupons.isClipped(coupon.getCoupon_id());
-            if(avail == null){
+            if (avail == null) {
                 coupon.setClipped(false);
                 coupon.setAvailable(false);
-            }
-            else{
+            } else {
                 coupon.setClipped(avail);
                 coupon.setAvailable(true);
             }
         }
 
-        showToast("Saving " +couponsArray.length+" coupons");
-        Log.d(TAG,"Saving " +couponsArray.length+" coupons");
+        showToast("Saving " + couponsArray.length + " coupons");
+        Log.d(TAG, "Saving " + couponsArray.length + " coupons");
         mCouponViewModel.insert(couponsArray);
     }
 
